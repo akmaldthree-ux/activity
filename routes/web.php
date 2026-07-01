@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Karyawan\DailyPlanController;
+use App\Http\Controllers\Manager\ApprovalController;
 use App\Http\Controllers\Manager\MonitoringController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\DivisionController;
@@ -12,6 +14,8 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login']);
+    Route::get('/register', [RegisterController::class, 'showForm'])->name('register');
+    Route::post('/register', [RegisterController::class, 'register']);
 });
 
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
@@ -34,6 +38,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/tim', [MonitoringController::class, 'tim'])->name('tim');
         Route::get('/tim/{user}/{date}', [MonitoringController::class, 'detail'])->name('detail');
         Route::post('/feedback/{dailyPlan}', [MonitoringController::class, 'saveFeedback'])->name('feedback');
+    });
+
+    // Manager / Admin: persetujuan akun
+    Route::prefix('approval')->name('approval.')->middleware('role:manager,admin')->group(function () {
+        Route::get('/', [ApprovalController::class, 'index'])->name('index');
+        Route::patch('/{user}/approve', [ApprovalController::class, 'approve'])->name('approve');
+        Route::patch('/{user}/reject', [ApprovalController::class, 'reject'])->name('reject');
     });
 
     // Admin

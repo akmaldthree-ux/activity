@@ -44,7 +44,7 @@
         </form>
 
         <p class="text-center text-muted small mt-3 mb-0">
-            Belum punya akun? Hubungi admin.
+            Belum punya akun? <a href="{{ route('register') }}">Daftar di sini</a>
         </p>
     </div>
 </div>

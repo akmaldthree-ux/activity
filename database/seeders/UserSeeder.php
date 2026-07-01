@@ -24,6 +24,7 @@ class UserSeeder extends Seeder
                 'role'     => 'admin',
                 'division_id' => null,
                 'is_active' => true,
+                'status'    => 'active',
             ]
         );
 

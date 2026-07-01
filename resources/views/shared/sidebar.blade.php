@@ -18,6 +18,15 @@
                 <i class="bi bi-people"></i> Tim
             </a>
         </li>
+        <li class="nav-item">
+            @php $pendingCount = \App\Models\User::where('status','pending')->when(Auth::user()->isManager(), fn($q) => $q->where('division_id', Auth::user()->division_id))->count(); @endphp
+            <a href="{{ route('approval.index') }}" class="nav-link {{ request()->routeIs('approval*') ? 'active' : '' }}">
+                <i class="bi bi-person-check"></i> Persetujuan
+                @if($pendingCount > 0)
+                    <span class="badge bg-warning text-dark ms-1">{{ $pendingCount }}</span>
+                @endif
+            </a>
+        </li>
     @endif
 
     @if(Auth::user()->isAdmin())

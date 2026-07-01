@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password', 'role', 'division_id', 'is_active'])]
+#[Fillable(['name', 'email', 'password', 'role', 'division_id', 'is_active', 'jabatan', 'no_hp', 'status', 'rejection_reason'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -20,20 +20,19 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     public const ROLE_KARYAWAN = 'karyawan';
-    public const ROLE_MANAGER = 'manager';
-    public const ROLE_ADMIN = 'admin';
+    public const ROLE_MANAGER  = 'manager';
+    public const ROLE_ADMIN    = 'admin';
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
+    public const STATUS_PENDING  = 'pending';
+    public const STATUS_ACTIVE   = 'active';
+    public const STATUS_REJECTED = 'rejected';
+
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'is_active' => 'boolean',
+            'password'          => 'hashed',
+            'is_active'         => 'boolean',
         ];
     }
 
@@ -62,12 +61,45 @@ class User extends Authenticatable
         return $this->role === self::ROLE_KARYAWAN;
     }
 
+    public function isPending(): bool
+    {
+        return $this->status === self::STATUS_PENDING;
+    }
+
+    public function isActive(): bool
+    {
+        return $this->status === self::STATUS_ACTIVE;
+    }
+
+    public function isRejected(): bool
+    {
+        return $this->status === self::STATUS_REJECTED;
+    }
+
     public function roleLabel(): string
     {
         return match ($this->role) {
-            self::ROLE_ADMIN => 'Admin',
+            self::ROLE_ADMIN   => 'Admin',
             self::ROLE_MANAGER => 'Manager',
-            default => 'Karyawan',
+            default            => 'Karyawan',
+        };
+    }
+
+    public function statusLabel(): string
+    {
+        return match ($this->status) {
+            self::STATUS_PENDING  => 'Menunggu Persetujuan',
+            self::STATUS_REJECTED => 'Ditolak',
+            default               => 'Aktif',
+        };
+    }
+
+    public function statusBadgeClass(): string
+    {
+        return match ($this->status) {
+            self::STATUS_PENDING  => 'bg-warning text-dark',
+            self::STATUS_REJECTED => 'bg-danger',
+            default               => 'bg-success',
         };
     }
 }

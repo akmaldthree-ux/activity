@@ -27,7 +27,23 @@ class LoginController extends Controller
             return back()->withErrors(['email' => 'Email atau password salah.'])->withInput();
         }
 
-        if (!Auth::user()->is_active) {
+        $user = Auth::user();
+
+        if ($user->isPending()) {
+            Auth::logout();
+            return back()->withErrors(['email' => 'Akun Anda masih menunggu persetujuan dari manager.'])->withInput();
+        }
+
+        if ($user->isRejected()) {
+            Auth::logout();
+            $msg = 'Akun Anda ditolak.';
+            if ($user->rejection_reason) {
+                $msg .= ' Alasan: ' . $user->rejection_reason;
+            }
+            return back()->withErrors(['email' => $msg])->withInput();
+        }
+
+        if (!$user->is_active) {
             Auth::logout();
             return back()->withErrors(['email' => 'Akun Anda tidak aktif. Hubungi admin.'])->withInput();
         }
