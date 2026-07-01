@@ -17,14 +17,19 @@ class ApprovalController extends Controller
         $manager    = Auth::user();
         $divisionId = $manager->isAdmin() ? null : $manager->division_id;
 
-        $pending = User::where('status', 'pending')
-            ->when($divisionId, fn($q) => $q->where('division_id', $divisionId))
-            ->with('division')
-            ->latest()
-            ->get();
+        if ($manager->isAdmin()) {
+            // Admin sees manager_approved accounts (waiting for final approval)
+            $pending = User::where('status', 'manager_approved')
+                ->with('division')->latest()->get();
+        } else {
+            // Manager sees pending accounts in their division
+            $pending = User::where('status', 'pending')
+                ->when($divisionId, fn($q) => $q->where('division_id', $divisionId))
+                ->with('division')->latest()->get();
+        }
 
         $recent = User::whereIn('status', ['active', 'rejected'])
-            ->when($divisionId, fn($q) => $q->where('division_id', $divisionId))
+            ->when(!$manager->isAdmin() && $divisionId, fn($q) => $q->where('division_id', $divisionId))
             ->where('role', 'karyawan')
             ->with('division')
             ->latest()
@@ -38,18 +43,19 @@ class ApprovalController extends Controller
     {
         $manager = Auth::user();
 
-        if ($manager->isManager() && $user->division_id !== $manager->division_id) {
-            abort(403);
+        if ($manager->isManager()) {
+            if ($user->division_id !== $manager->division_id) abort(403);
+            if ($user->status !== 'pending') abort(403, 'Status tidak valid.');
+
+            // Manager level: move to manager_approved
+            $user->update(['status' => 'manager_approved']);
+            return back()->with('success', "Akun {$user->name} disetujui manager. Menunggu persetujuan admin.");
         }
 
-        $user->update([
-            'status'    => 'active',
-            'is_active' => true,
-        ]);
-
+        // Admin level: final approval
+        $user->update(['status' => 'active', 'is_active' => true]);
         Mail::to($user->email)->queue(new AccountApprovedMail($user));
-
-        return back()->with('success', "Akun {$user->name} berhasil disetujui.");
+        return back()->with('success', "Akun {$user->name} berhasil disetujui dan aktif.");
     }
 
     public function reject(Request $request, User $user)

@@ -46,6 +46,17 @@
         </button>
         <div class="collapse navbar-collapse" id="navMain">
             <ul class="navbar-nav ms-auto align-items-md-center">
+                @php $unreadCount = \App\Models\InAppNotification::where('user_id', Auth::id())->whereNull('read_at')->count(); @endphp
+                <li class="nav-item">
+                    <a href="{{ route('notifications.index') }}" class="nav-link text-white position-relative">
+                        <i class="bi bi-bell fs-5"></i>
+                        @if($unreadCount > 0)
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:.6rem">
+                                {{ $unreadCount > 9 ? '9+' : $unreadCount }}
+                            </span>
+                        @endif
+                    </a>
+                </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle text-white" href="#" data-bs-toggle="dropdown">
                         <i class="bi bi-person-circle me-1"></i>{{ Auth::user()->name }}
@@ -53,6 +64,8 @@
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><span class="dropdown-item-text text-muted small">{{ Auth::user()->division?->name ?? '—' }}</span></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{{ route('profile.show') }}"><i class="bi bi-person-circle me-1"></i>Profil Saya</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li>
                             <form action="{{ route('logout') }}" method="POST">

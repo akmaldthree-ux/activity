@@ -6,9 +6,11 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['daily_plan_id', 'description', 'priority', 'status', 'realisasi', 'keterangan'])]
+#[Fillable(['daily_plan_id', 'description', 'priority', 'tag', 'status', 'realisasi', 'keterangan'])]
 class Activity extends Model
 {
+    public const TAGS = ['Meeting', 'Coding', 'Desain', 'Laporan', 'Review', 'Training', 'Support', 'Lainnya'];
+
     public const PRIORITY_TINGGI = 'tinggi';
     public const PRIORITY_SEDANG = 'sedang';
     public const PRIORITY_RENDAH = 'rendah';

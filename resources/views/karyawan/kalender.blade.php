@@ -52,12 +52,15 @@
                         $isCurrentMonth = $dayNum >= 1 && $dayNum <= $daysInMonth;
                         $isWeekend = $col >= 5; // Sab & Min
                         $dateStr = $isCurrentMonth ? \Carbon\Carbon::create($year, $month, $dayNum)->format('Y-m-d') : null;
-                        $plan = $dateStr ? ($plans[$dateStr] ?? null) : null;
+                        $isHoliday = $dateStr && isset($holidays[$dateStr]);
+                        $holidayName = $isHoliday ? $holidays[$dateStr] : null;
+                        $isOff = $isWeekend || $isHoliday;
+                        $plan = $dateStr && !$isOff ? ($plans[$dateStr] ?? null) : null;
                         $isToday = $dateStr === $now->toDateString();
-                        $status = $plan ? $plan->getCalendarStatus() : ($isCurrentMonth && !$isWeekend ? 'belum_isi' : '');
+                        $status = $plan ? $plan->getCalendarStatus() : ($isCurrentMonth && !$isOff ? 'belum_isi' : '');
                     @endphp
                     <div class="col">
-                        @if($isCurrentMonth && !$isWeekend)
+                        @if($isCurrentMonth && !$isOff)
                             <a href="{{ route('karyawan.daily', $dateStr) }}"
                                class="d-block cal-day border p-1 p-md-2 text-decoration-none text-dark {{ $isToday ? 'today' : '' }}">
                                 <div class="d-flex justify-content-between align-items-start">
@@ -71,10 +74,12 @@
                                     </div>
                                 @endif
                             </a>
-                        @elseif($isCurrentMonth && $isWeekend)
-                            <div class="cal-day weekend border p-1 p-md-2">
+                        @elseif($isCurrentMonth && $isOff)
+                            <div class="cal-day weekend border p-1 p-md-2" title="{{ $holidayName ?? 'Weekend' }}">
                                 <span class="day-num">{{ $dayNum }}</span>
-                                <div style="font-size:.65rem;color:#ccc">Libur</div>
+                                <div style="font-size:.6rem;color:#ccc;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+                                    {{ $holidayName ? Str::limit($holidayName, 10) : 'Libur' }}
+                                </div>
                             </div>
                         @else
                             <div class="cal-day border p-1 p-md-2 other-month">

@@ -7,6 +7,12 @@
         </li>
     @endif
 
+    <li class="nav-item">
+        <a href="{{ route('announcements.index') }}" class="nav-link {{ request()->routeIs('announcements*') ? 'active' : '' }}">
+            <i class="bi bi-megaphone"></i> Pengumuman
+        </a>
+    </li>
+
     @if(Auth::user()->isManager() || Auth::user()->isAdmin())
         <li class="nav-item">
             <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
@@ -16,6 +22,26 @@
         <li class="nav-item">
             <a href="{{ route('monitoring.tim') }}" class="nav-link {{ request()->routeIs('monitoring*') ? 'active' : '' }}">
                 <i class="bi bi-people"></i> Tim
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ route('kinerja.index') }}" class="nav-link {{ request()->routeIs('kinerja*') ? 'active' : '' }}">
+                <i class="bi bi-bar-chart-line"></i> Rekap Kinerja
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ route('leaderboard.index') }}" class="nav-link {{ request()->routeIs('leaderboard*') ? 'active' : '' }}">
+                <i class="bi bi-trophy"></i> Leaderboard
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ route('report.weekly') }}" class="nav-link {{ request()->routeIs('report.weekly*') ? 'active' : '' }}">
+                <i class="bi bi-file-earmark-text"></i> Rekap Mingguan
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ route('targets.index') }}" class="nav-link {{ request()->routeIs('targets*') ? 'active' : '' }}">
+                <i class="bi bi-bullseye"></i> Target Bulanan
             </a>
         </li>
         <li class="nav-item">
@@ -39,6 +65,16 @@
         <li class="nav-item">
             <a href="{{ route('admin.divisions.index') }}" class="nav-link {{ request()->routeIs('admin.divisions*') ? 'active' : '' }}">
                 <i class="bi bi-diagram-3"></i> Divisi
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ route('admin.holidays.index') }}" class="nav-link {{ request()->routeIs('admin.holidays*') ? 'active' : '' }}">
+                <i class="bi bi-calendar-x"></i> Hari Libur
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ route('admin.announcements.index') }}" class="nav-link {{ request()->routeIs('admin.announcements*') ? 'active' : '' }}">
+                <i class="bi bi-megaphone-fill"></i> Kelola Pengumuman
             </a>
         </li>
     @endif

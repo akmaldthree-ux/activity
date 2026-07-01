@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DailyPlan;
+use App\Models\Holiday;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -62,9 +63,13 @@ class DashboardController extends Controller
                 })->values();
         }
 
+        // Tren kepatuhan 4 minggu terakhir (% plan tersubmit per hari kerja)
+        $trendData = $this->getComplianceTrend($usersQuery->pluck('id')->toArray());
+
         return view('dashboard', compact(
             'totalKaryawan', 'sudahIsiHariIni', 'belumIsiHariIni',
-            'sudahIsiBulan', 'hariKerjaBulan', 'perDivisi', 'today'
+            'sudahIsiBulan', 'hariKerjaBulan', 'perDivisi', 'today',
+            'trendData'
         ));
     }
 
@@ -73,11 +78,42 @@ class DashboardController extends Controller
         $count = 0;
         $current = $start->copy();
         while ($current->lte($end)) {
-            if (!$current->isWeekend()) {
+            if (!$current->isWeekend() && !Holiday::isHoliday($current->toDateString())) {
                 $count++;
             }
             $current->addDay();
         }
         return $count;
+    }
+
+    private function getComplianceTrend(array $userIds): array
+    {
+        if (empty($userIds)) return ['labels' => [], 'plan' => [], 'report' => []];
+
+        $end   = Carbon::today('Asia/Jakarta');
+        $start = $end->copy()->subDays(27);
+        $labels = $plan = $report = [];
+
+        $current = $start->copy();
+        while ($current->lte($end)) {
+            if (!$current->isWeekend() && !Holiday::isHoliday($current->toDateString())) {
+                $dateStr = $current->toDateString();
+                $total = count($userIds);
+                if ($total === 0) {
+                    $current->addDay();
+                    continue;
+                }
+
+                $planCount   = DailyPlan::whereIn('user_id', $userIds)->whereDate('plan_date', $dateStr)->whereNotNull('plan_submitted_at')->count();
+                $reportCount = DailyPlan::whereIn('user_id', $userIds)->whereDate('plan_date', $dateStr)->whereNotNull('report_submitted_at')->count();
+
+                $labels[]  = $current->format('d/m');
+                $plan[]    = round($planCount / $total * 100);
+                $report[]  = round($reportCount / $total * 100);
+            }
+            $current->addDay();
+        }
+
+        return compact('labels', 'plan', 'report');
     }
 }

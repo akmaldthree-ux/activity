@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password', 'role', 'division_id', 'is_active', 'jabatan', 'no_hp', 'status', 'rejection_reason'])]
+#[Fillable(['name', 'email', 'password', 'role', 'division_id', 'is_active', 'jabatan', 'no_hp', 'photo', 'status', 'rejection_reason'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -23,9 +23,10 @@ class User extends Authenticatable
     public const ROLE_MANAGER  = 'manager';
     public const ROLE_ADMIN    = 'admin';
 
-    public const STATUS_PENDING  = 'pending';
-    public const STATUS_ACTIVE   = 'active';
-    public const STATUS_REJECTED = 'rejected';
+    public const STATUS_PENDING           = 'pending';
+    public const STATUS_MANAGER_APPROVED  = 'manager_approved';
+    public const STATUS_ACTIVE            = 'active';
+    public const STATUS_REJECTED          = 'rejected';
 
     protected function casts(): array
     {
@@ -66,6 +67,11 @@ class User extends Authenticatable
         return $this->status === self::STATUS_PENDING;
     }
 
+    public function isManagerApproved(): bool
+    {
+        return $this->status === self::STATUS_MANAGER_APPROVED;
+    }
+
     public function isActive(): bool
     {
         return $this->status === self::STATUS_ACTIVE;
@@ -88,18 +94,20 @@ class User extends Authenticatable
     public function statusLabel(): string
     {
         return match ($this->status) {
-            self::STATUS_PENDING  => 'Menunggu Persetujuan',
-            self::STATUS_REJECTED => 'Ditolak',
-            default               => 'Aktif',
+            self::STATUS_PENDING          => 'Menunggu Persetujuan Manager',
+            self::STATUS_MANAGER_APPROVED => 'Menunggu Persetujuan Admin',
+            self::STATUS_REJECTED         => 'Ditolak',
+            default                       => 'Aktif',
         };
     }
 
     public function statusBadgeClass(): string
     {
         return match ($this->status) {
-            self::STATUS_PENDING  => 'bg-warning text-dark',
-            self::STATUS_REJECTED => 'bg-danger',
-            default               => 'bg-success',
+            self::STATUS_PENDING          => 'bg-warning text-dark',
+            self::STATUS_MANAGER_APPROVED => 'bg-info text-dark',
+            self::STATUS_REJECTED         => 'bg-danger',
+            default                       => 'bg-success',
         };
     }
 }

@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Manager;
 use App\Http\Controllers\Controller;
 use App\Models\DailyPlan;
 use App\Models\Feedback;
+use App\Models\FeedbackReply;
+use App\Models\InAppNotification;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -57,7 +59,7 @@ class MonitoringController extends Controller
         }
 
         $parsedDate = Carbon::createFromFormat('Y-m-d', $date, 'Asia/Jakarta');
-        $plan = DailyPlan::with(['goals', 'activities', 'feedback.manager'])
+        $plan = DailyPlan::with(['goals', 'activities', 'feedback.manager', 'feedback.replies.user'])
             ->where('user_id', $user->id)
             ->where('plan_date', $date)
             ->firstOrFail();
@@ -90,6 +92,28 @@ class MonitoringController extends Controller
             ]
         );
 
+        // Notifikasi ke karyawan
+        InAppNotification::create([
+            'user_id' => $dailyPlan->user_id,
+            'type'    => 'feedback',
+            'title'   => 'Feedback baru dari ' . $manager->name,
+            'body'    => $request->comment ? \Illuminate\Support\Str::limit($request->comment, 80) : null,
+            'url'     => route('karyawan.daily', $dailyPlan->plan_date->format('Y-m-d')),
+        ]);
+
         return back()->with('success', 'Feedback berhasil disimpan.');
+    }
+
+    public function replyFeedback(Request $request, Feedback $feedback)
+    {
+        $request->validate(['body' => ['required', 'string', 'max:1000']]);
+
+        FeedbackReply::create([
+            'feedback_id' => $feedback->id,
+            'user_id'     => Auth::id(),
+            'body'        => $request->body,
+        ]);
+
+        return back()->with('success', 'Balasan berhasil dikirim.');
     }
 }

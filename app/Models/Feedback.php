@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['daily_plan_id', 'manager_id', 'comment', 'rating'])]
 class Feedback extends Model
@@ -22,5 +23,10 @@ class Feedback extends Model
     public function manager(): BelongsTo
     {
         return $this->belongsTo(User::class, 'manager_id');
+    }
+
+    public function replies(): HasMany
+    {
+        return $this->hasMany(FeedbackReply::class)->with('user')->orderBy('created_at');
     }
 }

@@ -45,6 +45,11 @@ class DailyPlan extends Model
         return $this->hasOne(Feedback::class);
     }
 
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(ReportAttachment::class);
+    }
+
     // Status kalender: belum_isi | plan_telat | plan_ok | laporan_telat | lengkap
     public function getCalendarStatus(): string
     {

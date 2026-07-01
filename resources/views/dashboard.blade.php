@@ -83,9 +83,60 @@
 </div>
 @endif
 
+{{-- Grafik Tren Kepatuhan --}}
+@if(count($trendData['labels']))
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white fw-semibold border-0 pt-3">
+        <i class="bi bi-graph-up me-1 text-primary"></i>Tren Kepatuhan 4 Minggu Terakhir
+    </div>
+    <div class="card-body">
+        <canvas id="trendChart" height="80"></canvas>
+    </div>
+</div>
+@endif
+
 <div class="d-flex gap-2">
     <a href="{{ route('monitoring.tim') }}" class="btn btn-primary">
         <i class="bi bi-people me-1"></i>Lihat Detail Tim
     </a>
 </div>
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+@if(count($trendData['labels']))
+const ctx = document.getElementById('trendChart').getContext('2d');
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: @json($trendData['labels']),
+        datasets: [
+            {
+                label: 'Plan (%)',
+                data: @json($trendData['plan']),
+                borderColor: '#0d6efd',
+                backgroundColor: 'rgba(13,110,253,.1)',
+                tension: 0.3, fill: true, pointRadius: 3,
+            },
+            {
+                label: 'Report (%)',
+                data: @json($trendData['report']),
+                borderColor: '#198754',
+                backgroundColor: 'rgba(25,135,84,.1)',
+                tension: 0.3, fill: true, pointRadius: 3,
+            }
+        ]
+    },
+    options: {
+        scales: {
+            y: { min: 0, max: 100, ticks: { callback: v => v + '%' } }
+        },
+        plugins: {
+            tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y + '%' } }
+        }
+    }
+});
+@endif
+</script>
+@endpush

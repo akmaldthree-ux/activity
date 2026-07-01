@@ -34,6 +34,11 @@ class LoginController extends Controller
             return back()->withErrors(['email' => 'Akun Anda masih menunggu persetujuan dari manager.'])->withInput();
         }
 
+        if ($user->isManagerApproved()) {
+            Auth::logout();
+            return back()->withErrors(['email' => 'Akun Anda sudah disetujui manager dan menunggu persetujuan akhir dari admin.'])->withInput();
+        }
+
         if ($user->isRejected()) {
             Auth::logout();
             $msg = 'Akun Anda ditolak.';

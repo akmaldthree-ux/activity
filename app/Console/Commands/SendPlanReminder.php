@@ -4,7 +4,9 @@ namespace App\Console\Commands;
 
 use App\Mail\PlanReminderMail;
 use App\Models\DailyPlan;
+use App\Models\Holiday;
 use App\Models\User;
+use App\Services\WhatsAppService;
 use Carbon\Carbon;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
@@ -19,8 +21,8 @@ class SendPlanReminder extends Command
     {
         $today = Carbon::today('Asia/Jakarta');
 
-        // Skip weekend
-        if ($today->isWeekend()) {
+        // Skip weekend & holiday
+        if ($today->isWeekend() || Holiday::isHoliday($today->toDateString())) {
             $this->info('Hari libur, tidak ada reminder.');
             return;
         }
@@ -36,9 +38,17 @@ class SendPlanReminder extends Command
 
         $belumIsi = $karyawans->whereNotIn('id', $alreadyFilled);
 
+        $wa = app(WhatsAppService::class);
+
         foreach ($belumIsi as $user) {
             Mail::to($user->email)->queue(new PlanReminderMail($user, $today));
-            $this->line("Reminder terkirim ke: {$user->email}");
+            $this->line("Email reminder: {$user->email}");
+
+            if ($user->no_hp) {
+                $msg = "Hai {$user->name}, jangan lupa isi *Plan Pagi* hari ini sebelum pukul 09:00 WIB.\n\nAkses: " . config('app.url') . '/kalender/' . $today->toDateString();
+                $wa->send($user->no_hp, $msg);
+                $this->line("WA reminder: {$user->no_hp}");
+            }
         }
 
         $this->info("Total: {$belumIsi->count()} reminder plan pagi terkirim.");

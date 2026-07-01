@@ -51,6 +51,26 @@
 
     <div class="card-body">
         @if($canEditPlan)
+        {{-- Carry over aktivitas belum selesai --}}
+        @if($carryOverActivities->count())
+        <div class="alert alert-info py-2 mb-3">
+            <div class="fw-semibold mb-1"><i class="bi bi-arrow-repeat me-1"></i>Ada {{ $carryOverActivities->count() }} aktivitas belum selesai kemarin:</div>
+            @foreach($carryOverActivities as $co)
+            <div class="d-flex align-items-center justify-content-between mb-1">
+                <small>{{ $co->description }} <span class="badge bg-secondary">{{ $co->statusLabel() }}</span></small>
+                <button type="button" class="btn btn-xs btn-sm btn-outline-primary py-0 px-2"
+                        onclick="addCarryOver({{ json_encode($co->description) }}, {{ json_encode($co->priority) }})">
+                    + Tambah
+                </button>
+            </div>
+            @endforeach
+            <button type="button" class="btn btn-sm btn-info mt-1"
+                    onclick="addAllCarryOver()">
+                <i class="bi bi-plus-circle me-1"></i>Tambahkan Semua
+            </button>
+        </div>
+        @endif
+
         {{-- Form plan --}}
         <form action="{{ route('karyawan.plan.store', $parsedDate->format('Y-m-d')) }}" method="POST" id="formPlan">
             @csrf
@@ -109,18 +129,32 @@
             <div class="mb-3">
                 <div class="d-flex align-items-center justify-content-between mb-2">
                     <label class="fw-semibold">📌 Aktivitas Prioritas</label>
-                    <button type="button" class="btn btn-sm btn-outline-success" id="btnAddActivity">
-                        <i class="bi bi-plus"></i> Tambah
-                    </button>
+                    <div class="d-flex gap-1">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalTemplate">
+                            <i class="bi bi-bookmark me-1"></i>Template
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-success" id="btnAddActivity">
+                            <i class="bi bi-plus"></i> Tambah
+                        </button>
+                    </div>
                 </div>
                 <div id="activityContainer">
+                    @php $tags = \App\Models\Activity::TAGS; @endphp
                     @forelse($plan->activities ?? [] as $activity)
                     <div class="activity-row-item mb-2 p-2 activity-row">
                         <div class="row g-2 align-items-center">
-                            <div class="col-md-8">
+                            <div class="col-md-6">
                                 <input type="text" name="activities[{{ $loop->index }}][description]"
                                        class="form-control form-control-sm" placeholder="Deskripsi aktivitas"
                                        value="{{ $activity->description }}" required>
+                            </div>
+                            <div class="col-md-2">
+                                <select name="activities[{{ $loop->index }}][tag]" class="form-select form-select-sm">
+                                    <option value="">Tag</option>
+                                    @foreach($tags as $t)
+                                    <option value="{{ $t }}" {{ $activity->tag==$t?'selected':'' }}>{{ $t }}</option>
+                                    @endforeach
+                                </select>
                             </div>
                             <div class="col-md-3">
                                 <select name="activities[{{ $loop->index }}][priority]" class="form-select form-select-sm">
@@ -139,9 +173,17 @@
                     @empty
                     <div class="activity-row-item mb-2 p-2 activity-row">
                         <div class="row g-2 align-items-center">
-                            <div class="col-md-8">
+                            <div class="col-md-6">
                                 <input type="text" name="activities[0][description]" class="form-control form-control-sm"
                                        placeholder="Contoh: Meeting dengan tim" required>
+                            </div>
+                            <div class="col-md-2">
+                                <select name="activities[0][tag]" class="form-select form-select-sm">
+                                    <option value="">Tag</option>
+                                    @foreach($tags as $t)
+                                    <option value="{{ $t }}">{{ $t }}</option>
+                                    @endforeach
+                                </select>
                             </div>
                             <div class="col-md-3">
                                 <select name="activities[0][priority]" class="form-select form-select-sm">
@@ -182,7 +224,10 @@
             @foreach($plan->activities as $act)
             <div class="mb-2 p-2 activity-row rounded d-flex justify-content-between align-items-start">
                 <span>{{ $act->description }}</span>
-                <span class="badge priority-badge-{{ $act->priority }} ms-2">{{ $act->priorityLabel() }}</span>
+                <div class="d-flex gap-1 flex-shrink-0 ms-2">
+                    @if($act->tag) <span class="badge bg-light text-secondary border">{{ $act->tag }}</span> @endif
+                    <span class="badge priority-badge-{{ $act->priority }}">{{ $act->priorityLabel() }}</span>
+                </div>
             </div>
             @endforeach
         @endif
@@ -218,7 +263,7 @@
             <p class="text-muted">Isi plan pagi terlebih dahulu.</p>
         @elseif($canEditReport)
         {{-- Form report --}}
-        <form action="{{ route('karyawan.report.store', $parsedDate->format('Y-m-d')) }}" method="POST">
+        <form action="{{ route('karyawan.report.store', $parsedDate->format('Y-m-d')) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @foreach($plan->activities as $idx => $activity)
             <input type="hidden" name="activities[{{ $idx }}][id]" value="{{ $activity->id }}">
@@ -259,6 +304,13 @@
                           placeholder="Apa yang bisa ditingkatkan hari ini?">{{ $plan->insight }}</textarea>
             </div>
 
+            <div class="mb-3">
+                <label class="form-label fw-semibold">📎 Lampiran (Opsional, maks. 5 file)</label>
+                <input type="file" name="attachments[]" class="form-control" multiple
+                       accept="image/*,.pdf,.doc,.docx,.xls,.xlsx">
+                <div class="form-text">Foto bukti, dokumen, atau tangkapan layar. Maks. 5 MB per file.</div>
+            </div>
+
             <button type="submit" class="btn btn-success">
                 <i class="bi bi-send me-1"></i>
                 {{ $plan->report_submitted_at ? 'Perbarui Report' : 'Kirim Report Sore' }}
@@ -293,7 +345,65 @@
         @if(!$plan->report_submitted_at)
             <p class="text-muted">Report belum diisi.</p>
         @endif
+
+        {{-- Lampiran --}}
+        @if($plan->attachments && $plan->attachments->count())
+        <div class="mt-3">
+            <h6 class="text-muted small fw-semibold mb-2">📎 LAMPIRAN</h6>
+            <div class="d-flex flex-wrap gap-2">
+                @foreach($plan->attachments as $att)
+                @if($att->isImage())
+                    <a href="{{ Storage::url($att->path) }}" target="_blank">
+                        <img src="{{ Storage::url($att->path) }}" alt="{{ $att->original_name }}"
+                             class="rounded border" style="height:80px;width:80px;object-fit:cover;">
+                    </a>
+                @else
+                    <a href="{{ Storage::url($att->path) }}" target="_blank"
+                       class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-file-earmark me-1"></i>{{ $att->original_name }}
+                    </a>
+                @endif
+                @endforeach
+            </div>
+        </div>
         @endif
+        @endif
+    </div>
+</div>
+
+{{-- Modal Template Aktivitas --}}
+<div class="modal fade" id="modalTemplate" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title fw-bold"><i class="bi bi-bookmark me-1"></i>Template Aktivitas</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="templateList" class="mb-3">
+                    <div class="text-muted small text-center py-3">Memuat...</div>
+                </div>
+                <hr>
+                <div class="fw-semibold small mb-2">Simpan sebagai Template Baru</div>
+                <div class="row g-2">
+                    <div class="col-8">
+                        <input type="text" id="tplDesc" class="form-control form-control-sm" placeholder="Deskripsi aktivitas">
+                    </div>
+                    <div class="col-3">
+                        <select id="tplPriority" class="form-select form-select-sm">
+                            <option value="tinggi">🔴 Tinggi</option>
+                            <option value="sedang" selected>🟡 Sedang</option>
+                            <option value="rendah">🟢 Rendah</option>
+                        </select>
+                    </div>
+                    <div class="col-1">
+                        <button type="button" class="btn btn-sm btn-primary w-100" onclick="saveTemplate()">
+                            <i class="bi bi-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -304,17 +414,56 @@
         <h6 class="fw-bold mb-0"><i class="bi bi-chat-dots me-1 text-warning"></i>Feedback Atasan</h6>
     </div>
     <div class="card-body">
-        <div class="d-flex align-items-center gap-2 mb-1">
-            <span class="fw-semibold small">{{ $plan->feedback->manager->name }}</span>
-            @if($plan->feedback->rating)
-                <span class="text-warning">
-                    @for($i=1;$i<=5;$i++)
-                        <i class="bi bi-star{{ $i <= $plan->feedback->rating ? '-fill' : '' }}"></i>
-                    @endfor
-                </span>
-            @endif
+        {{-- Feedback utama --}}
+        <div class="d-flex align-items-start gap-3 mb-3">
+            <div class="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                 style="width:36px;height:36px;font-size:.85rem">
+                {{ strtoupper(substr($plan->feedback->manager->name, 0, 1)) }}
+            </div>
+            <div class="flex-grow-1">
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <span class="fw-semibold small">{{ $plan->feedback->manager->name }}</span>
+                    @if($plan->feedback->rating)
+                        <span class="text-warning small">
+                            @for($i=1;$i<=5;$i++)
+                                <i class="bi bi-star{{ $i <= $plan->feedback->rating ? '-fill' : '' }}"></i>
+                            @endfor
+                        </span>
+                    @endif
+                    <span class="text-muted" style="font-size:.7rem">{{ $plan->feedback->created_at->diffForHumans() }}</span>
+                </div>
+                <p class="mb-0 small">{{ $plan->feedback->comment ?? '—' }}</p>
+            </div>
         </div>
-        <p class="mb-0">{{ $plan->feedback->comment ?? '—' }}</p>
+
+        {{-- Balasan --}}
+        @foreach($plan->feedback->replies as $reply)
+        <div class="d-flex align-items-start gap-3 mb-2 ps-4">
+            <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                 style="width:30px;height:30px;font-size:.75rem">
+                {{ strtoupper(substr($reply->user->name, 0, 1)) }}
+            </div>
+            <div class="flex-grow-1 bg-light rounded p-2">
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <span class="fw-semibold small">{{ $reply->user->name }}</span>
+                    <span class="text-muted" style="font-size:.7rem">{{ $reply->created_at->diffForHumans() }}</span>
+                </div>
+                <p class="mb-0 small">{{ $reply->body }}</p>
+            </div>
+        </div>
+        @endforeach
+
+        {{-- Form balasan --}}
+        <div class="ps-4 mt-3">
+            <form action="{{ route('feedback.reply', $plan->feedback) }}" method="POST" class="d-flex gap-2">
+                @csrf
+                <input type="text" name="body" class="form-control form-control-sm"
+                       placeholder="Tulis balasan..." required>
+                <button type="submit" class="btn btn-sm btn-outline-primary flex-shrink-0">
+                    <i class="bi bi-send"></i>
+                </button>
+            </form>
+        </div>
     </div>
 </div>
 @endif
@@ -347,13 +496,17 @@ document.getElementById('btnAddGoal')?.addEventListener('click', () => {
     attachRemoveGoal(div.querySelector('.btn-remove-goal'));
 });
 
+const availableTags = @json(\App\Models\Activity::TAGS);
+const tagOptions = availableTags.map(t => `<option value="${t}">${t}</option>`).join('');
+
 document.getElementById('btnAddActivity')?.addEventListener('click', () => {
     actIdx++;
     const container = document.getElementById('activityContainer');
     const div = document.createElement('div');
     div.className = 'activity-row-item mb-2 p-2 activity-row';
     div.innerHTML = `<div class="row g-2 align-items-center">
-        <div class="col-md-8"><input type="text" name="activities[${actIdx}][description]" class="form-control form-control-sm" placeholder="Deskripsi aktivitas" required></div>
+        <div class="col-md-6"><input type="text" name="activities[${actIdx}][description]" class="form-control form-control-sm" placeholder="Deskripsi aktivitas" required></div>
+        <div class="col-md-2"><select name="activities[${actIdx}][tag]" class="form-select form-select-sm"><option value="">Tag</option>${tagOptions}</select></div>
         <div class="col-md-3"><select name="activities[${actIdx}][priority]" class="form-select form-select-sm">
             <option value="tinggi">🔴 Tinggi</option>
             <option value="sedang" selected>🟡 Sedang</option>
@@ -384,5 +537,76 @@ function attachRemoveActivity(btn) {
 
 document.querySelectorAll('.btn-remove-goal').forEach(attachRemoveGoal);
 document.querySelectorAll('.btn-remove-activity').forEach(attachRemoveActivity);
+
+// Carry over helpers
+const carryOverData = @json($carryOverActivities->map(fn($a) => ['description' => $a->description, 'priority' => $a->priority]));
+
+function addCarryOver(desc, priority, tag) {
+    actIdx++;
+    const container = document.getElementById('activityContainer');
+    if (!container) return;
+    const div = document.createElement('div');
+    div.className = 'activity-row-item mb-2 p-2 activity-row';
+    div.innerHTML = `<div class="row g-2 align-items-center">
+        <div class="col-md-6"><input type="text" name="activities[${actIdx}][description]" class="form-control form-control-sm" value="${desc.replace(/"/g,'&quot;')}" required></div>
+        <div class="col-md-2"><select name="activities[${actIdx}][tag]" class="form-select form-select-sm"><option value="">Tag</option>${tagOptions}</select></div>
+        <div class="col-md-3"><select name="activities[${actIdx}][priority]" class="form-select form-select-sm">
+            <option value="tinggi" ${priority==='tinggi'?'selected':''}>🔴 Tinggi</option>
+            <option value="sedang" ${priority==='sedang'?'selected':''}>🟡 Sedang</option>
+            <option value="rendah" ${priority==='rendah'?'selected':''}>🟢 Rendah</option>
+        </select></div>
+        <div class="col-md-1"><button type="button" class="btn btn-sm btn-outline-danger btn-remove-activity w-100"><i class="bi bi-trash"></i></button></div>
+    </div>`;
+    container.appendChild(div);
+    attachRemoveActivity(div.querySelector('.btn-remove-activity'));
+}
+
+function addAllCarryOver() {
+    carryOverData.forEach(item => addCarryOver(item.description, item.priority));
+}
+
+// Template Aktivitas
+const csrf = document.querySelector('meta[name="csrf-token"]').content;
+
+async function loadTemplates() {
+    const res = await fetch('{{ route("templates.index") }}');
+    const templates = await res.json();
+    const list = document.getElementById('templateList');
+    if (!templates.length) {
+        list.innerHTML = '<div class="text-muted small text-center py-2">Belum ada template.</div>';
+        return;
+    }
+    list.innerHTML = templates.map(t => `
+        <div class="d-flex align-items-center justify-content-between py-1 border-bottom">
+            <span class="small">${t.description}</span>
+            <div class="d-flex gap-1">
+                <button type="button" class="btn btn-xs btn-sm btn-outline-primary py-0 px-2"
+                        onclick="addCarryOver(${JSON.stringify(t.description)}, ${JSON.stringify(t.priority)})">+ Pakai</button>
+                <button type="button" class="btn btn-xs btn-sm btn-outline-danger py-0 px-2"
+                        onclick="deleteTemplate(${t.id}, this)"><i class="bi bi-trash"></i></button>
+            </div>
+        </div>`).join('');
+}
+
+async function saveTemplate() {
+    const desc = document.getElementById('tplDesc').value.trim();
+    const prio = document.getElementById('tplPriority').value;
+    if (!desc) return;
+    await fetch('{{ route("templates.store") }}', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json','X-CSRF-TOKEN': csrf},
+        body: JSON.stringify({description: desc, priority: prio})
+    });
+    document.getElementById('tplDesc').value = '';
+    loadTemplates();
+}
+
+async function deleteTemplate(id, btn) {
+    btn.disabled = true;
+    await fetch(`/templates/${id}`, {method:'DELETE', headers:{'X-CSRF-TOKEN':csrf}});
+    loadTemplates();
+}
+
+document.getElementById('modalTemplate')?.addEventListener('show.bs.modal', loadTemplates);
 </script>
 @endpush
