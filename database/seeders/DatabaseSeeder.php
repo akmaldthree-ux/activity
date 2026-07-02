@@ -13,7 +13,12 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             DivisionSeeder::class,
+            HolidaySeeder::class,
             UserSeeder::class,
+            DailyPlanSeeder::class,
+            ActivityTemplateSeeder::class,
+            AnnouncementSeeder::class,
+            DivisionTargetSeeder::class,
         ]);
     }
 }
