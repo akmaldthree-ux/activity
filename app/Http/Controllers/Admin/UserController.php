@@ -27,7 +27,7 @@ class UserController extends Controller
     public function create()
     {
         $divisions = Division::orderBy('name')->get();
-        return view('admin.users.form', compact('divisions'));
+        return view('admin.users.form', compact('divisions') + ['user' => null]);
     }
 
     public function store(Request $request)
