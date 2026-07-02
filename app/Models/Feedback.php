@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['daily_plan_id', 'manager_id', 'comment', 'rating'])]
 class Feedback extends Model
 {
+    protected $table = 'feedbacks';
+
     protected function casts(): array
     {
         return ['rating' => 'integer'];
