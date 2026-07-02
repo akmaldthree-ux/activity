@@ -7,11 +7,11 @@
 
 {{-- Pending --}}
 @if($pending->count())
-<div class="card border-0 shadow-sm mb-4 border-warning" style="border-left: 4px solid #ffc107 !important;">
+<div class="card border-0 shadow-sm mb-4" style="border-left: 3px solid #c47a00 !important;">
     <div class="card-header bg-white border-0 pt-3 pb-0">
-        <h6 class="fw-bold mb-0 text-warning">
+        <h6 class="fw-bold mb-0" style="color:#c47a00">
             <i class="bi bi-clock me-1"></i>Menunggu Persetujuan
-            <span class="badge bg-warning text-dark ms-1">{{ $pending->count() }}</span>
+            <span class="badge ms-1" style="background:#c47a00">{{ $pending->count() }}</span>
         </h6>
     </div>
     <div class="card-body p-0">

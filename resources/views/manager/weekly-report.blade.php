@@ -5,10 +5,10 @@
 @push('styles')
 <style>
 @media print {
-    .navbar, .sidebar, .col-md-2, .no-print { display: none !important; }
-    .col-md-10 { flex: 0 0 100%; max-width: 100%; padding: 0 !important; }
-    .container-fluid { padding: 0 !important; }
-    .card { border: 1px solid #dee2e6 !important; box-shadow: none !important; }
+    .n-topnav, .n-sidebar, .n-backdrop, .no-print { display: none !important; }
+    .n-shell { display: block !important; }
+    .n-main { padding: 0 !important; }
+    .card { border: 1px solid #e6e6e6 !important; box-shadow: none !important; }
 }
 </style>
 @endpush

@@ -22,7 +22,7 @@
                         <h6 class="fw-bold mb-0">{{ $a->title }}</h6>
                         <div class="d-flex gap-2 align-items-center">
                             @if($a->division)
-                                <span class="badge bg-info text-dark">{{ $a->division->name }}</span>
+                                <span class="badge bg-info">{{ $a->division->name }}</span>
                             @else
                                 <span class="badge bg-secondary">Semua Divisi</span>
                             @endif

@@ -25,8 +25,7 @@
                             <img src="{{ Storage::url($user->photo) }}" alt="Foto Profil"
                                  class="rounded-circle object-fit-cover mb-2" style="width:96px;height:96px;object-fit:cover;">
                         @else
-                            <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2"
-                                 style="width:96px;height:96px;font-size:2rem;">
+                            <div class="n-initials mb-2" style="width:96px;height:96px;font-size:2rem;background:var(--n-primary);display:inline-flex">
                                 {{ strtoupper(substr($user->name, 0, 1)) }}
                             </div>
                         @endif
@@ -126,7 +125,7 @@
                     </div>
 
                     <div class="d-grid">
-                        <button type="submit" class="btn btn-warning fw-semibold">
+                        <button type="submit" class="btn btn-primary fw-semibold">
                             <i class="bi bi-key me-1"></i>Ganti Password
                         </button>
                     </div>

@@ -110,7 +110,7 @@
                     @endfor
                 </div>
             </div>
-            <button type="submit" class="btn btn-warning">
+            <button type="submit" class="btn btn-primary">
                 <i class="bi bi-send me-1"></i>Simpan Feedback
             </button>
         </form>

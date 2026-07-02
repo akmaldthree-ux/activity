@@ -54,7 +54,7 @@
                         <td class="fw-semibold">{{ $user->name }}</td>
                         <td class="d-none d-md-table-cell small text-muted">{{ $user->email }}</td>
                         <td>
-                            <span class="badge {{ $user->role=='admin' ? 'bg-danger' : ($user->role=='manager' ? 'bg-warning text-dark' : 'bg-primary') }}">
+                            <span class="badge {{ $user->role=='admin' ? 'bg-danger' : ($user->role=='manager' ? 'bg-warning' : 'bg-primary') }}">
                                 {{ $user->roleLabel() }}
                             </span>
                         </td>

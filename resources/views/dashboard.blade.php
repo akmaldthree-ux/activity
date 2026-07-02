@@ -115,15 +115,15 @@ new Chart(ctx, {
             {
                 label: 'Plan (%)',
                 data: @json($trendData['plan']),
-                borderColor: '#0d6efd',
-                backgroundColor: 'rgba(13,110,253,.1)',
+                borderColor: '#0075de',
+                backgroundColor: 'rgba(0,117,222,.08)',
                 tension: 0.3, fill: true, pointRadius: 3,
             },
             {
                 label: 'Report (%)',
                 data: @json($trendData['report']),
-                borderColor: '#198754',
-                backgroundColor: 'rgba(25,135,84,.1)',
+                borderColor: '#1aae39',
+                backgroundColor: 'rgba(26,174,57,.08)',
                 tension: 0.3, fill: true, pointRadius: 3,
             }
         ]

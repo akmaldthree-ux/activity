@@ -3,18 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Login') — {{ config('app.name') }}</title>
+    <title>@yield('title', 'Daily Plan') — {{ config('app.name') }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
-        body { background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%); min-height: 100vh; }
-        .login-card { border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,.15); }
+        :root {
+            --n-primary: #0075de;
+            --n-primary-active: #005bab;
+            --n-canvas-soft: #f6f5f4;
+            --n-surface: #ffffff;
+            --n-ink: #000000;
+            --n-ink-2: #31302e;
+            --n-ink-muted: #615d59;
+            --n-ink-faint: #a39e98;
+            --n-hairline: #e6e6e6;
+            --n-r-xs: 4px;
+            --n-r-md: 8px;
+            --n-r-xl: 16px;
+            --n-r-full: 9999px;
+            --n-shadow:
+                0 0.175px 1.041px rgba(0,0,0,.01),
+                0 0.8px   2.925px rgba(0,0,0,.02),
+                0 2.025px 7.847px rgba(0,0,0,.027),
+                0 4px     18px    rgba(0,0,0,.04);
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, system-ui, 'Segoe UI', Helvetica, Arial, sans-serif;
+            background: var(--n-canvas-soft);
+            color: var(--n-ink);
+            font-size: 14px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+        }
+        .g-brand {
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 28px; text-decoration: none; color: var(--n-ink);
+        }
+        .g-brand-icon {
+            width: 36px; height: 36px; border-radius: 8px;
+            background: var(--n-primary);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 18px;
+        }
+        .g-brand-name {
+            font-size: 20px; font-weight: 700; letter-spacing: -0.25px;
+        }
+        .g-card {
+            background: var(--n-surface);
+            border: 1px solid var(--n-hairline);
+            border-radius: var(--n-r-xl);
+            box-shadow: var(--n-shadow);
+            padding: 32px;
+            width: 100%;
+            max-width: 440px;
+        }
+        .g-card-wide { max-width: 520px; }
+        .g-card h4 { font-size: 22px; font-weight: 700; letter-spacing: -0.25px; color: var(--n-ink); }
+        .g-hint { font-size: 13px; color: var(--n-ink-muted); }
+
+        /* Form controls */
+        .form-label { font-size: 13px; font-weight: 600; color: var(--n-ink-2); margin-bottom: 5px; }
+        .form-control, .form-select {
+            border-color: var(--n-hairline); border-radius: var(--n-r-xs) !important;
+            font-size: 14px; color: var(--n-ink); background: var(--n-surface);
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--n-primary); box-shadow: 0 0 0 3px rgba(0,117,222,.1);
+        }
+        .input-group-text {
+            background: var(--n-canvas-soft); border-color: var(--n-hairline);
+            color: var(--n-ink-muted); font-size: 14px;
+        }
+        .btn-primary {
+            background: var(--n-primary) !important; border-color: var(--n-primary) !important;
+            color: #fff !important; border-radius: var(--n-r-full) !important;
+            font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 500;
+        }
+        .btn-primary:hover { background: var(--n-primary-active) !important; border-color: var(--n-primary-active) !important; }
+        .btn-lg { padding: 10px 24px; }
+        .alert {
+            border-radius: var(--n-r-md) !important; font-size: 14px;
+        }
+        .alert-danger  { background: #fff5f5 !important; border-color: #f5c6cb !important; color: #721c24 !important; }
+        .alert-success { background: #f0faf3 !important; border-color: #c3e6cb !important; color: #155724 !important; }
+        a { color: var(--n-primary); }
+        a:hover { color: var(--n-primary-active); }
+        .g-footer-note { font-size: 12px; color: var(--n-ink-faint); text-align: center; margin-top: 20px; }
     </style>
 </head>
-<body class="d-flex align-items-center justify-content-center py-5">
-    <div class="container" style="max-width: 420px;">
-        @yield('content')
-    </div>
+<body>
+    <a href="/" class="g-brand">
+        <span class="g-brand-icon"><i class="bi bi-calendar-check"></i></span>
+        <span class="g-brand-name">Daily Plan</span>
+    </a>
+    @yield('content')
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

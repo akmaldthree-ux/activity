@@ -4,13 +4,13 @@
 
 @push('styles')
 <style>
-    .section-card { border-left: 4px solid; border-radius: 8px; }
-    .section-plan   { border-left-color: #0d6efd; }
-    .section-report { border-left-color: #198754; }
-    .activity-row { background: #f8f9fa; border-radius: 6px; }
-    .priority-badge-tinggi { background: #fee2e2; color: #991b1b; }
-    .priority-badge-sedang { background: #fef3c7; color: #92400e; }
-    .priority-badge-rendah { background: #d1fae5; color: #065f46; }
+    .section-card   { border-left: 3px solid; }
+    .section-plan   { border-left-color: var(--n-primary); }
+    .section-report { border-left-color: var(--n-green); }
+    .activity-row   { background: var(--n-canvas-soft); border-radius: var(--n-r-md); }
+    .priority-badge-tinggi { background: #fee2e2; color: #991b1b; border-radius: 4px; font-size:11px; font-weight:600; padding:2px 7px; }
+    .priority-badge-sedang { background: #fef3c7; color: #92400e; border-radius: 4px; font-size:11px; font-weight:600; padding:2px 7px; }
+    .priority-badge-rendah { background: #d1fae5; color: #065f46; border-radius: 4px; font-size:11px; font-weight:600; padding:2px 7px; }
 </style>
 @endpush
 
@@ -64,7 +64,7 @@
                 </button>
             </div>
             @endforeach
-            <button type="button" class="btn btn-sm btn-info mt-1"
+            <button type="button" class="btn btn-sm btn-primary mt-1"
                     onclick="addAllCarryOver()">
                 <i class="bi bi-plus-circle me-1"></i>Tambahkan Semua
             </button>
@@ -416,8 +416,7 @@
     <div class="card-body">
         {{-- Feedback utama --}}
         <div class="d-flex align-items-start gap-3 mb-3">
-            <div class="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
-                 style="width:36px;height:36px;font-size:.85rem">
+            <div class="n-initials bg-primary" style="width:36px;height:36px;font-size:13px">
                 {{ strtoupper(substr($plan->feedback->manager->name, 0, 1)) }}
             </div>
             <div class="flex-grow-1">
@@ -439,11 +438,10 @@
         {{-- Balasan --}}
         @foreach($plan->feedback->replies as $reply)
         <div class="d-flex align-items-start gap-3 mb-2 ps-4">
-            <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
-                 style="width:30px;height:30px;font-size:.75rem">
+            <div class="n-initials" style="width:28px;height:28px;font-size:11px;background:var(--n-ink-faint)">
                 {{ strtoupper(substr($reply->user->name, 0, 1)) }}
             </div>
-            <div class="flex-grow-1 bg-light rounded p-2">
+            <div class="flex-grow-1 rounded p-2" style="background:var(--n-canvas-soft)">
                 <div class="d-flex align-items-center gap-2 mb-1">
                     <span class="fw-semibold small">{{ $reply->user->name }}</span>
                     <span class="text-muted" style="font-size:.7rem">{{ $reply->created_at->diffForHumans() }}</span>
