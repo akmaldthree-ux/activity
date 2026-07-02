@@ -32,7 +32,7 @@
         * { box-sizing: border-box; }
         body {
             font-family: 'Inter', -apple-system, system-ui, 'Segoe UI', Helvetica, Arial, sans-serif;
-            background: var(--n-canvas-soft);
+            background: linear-gradient(145deg, #0f1b5c 0%, #213183 35%, #1a5199 65%, #0075de 100%);
             color: var(--n-ink);
             font-size: 14px;
             min-height: 100vh;
@@ -41,19 +41,44 @@
             align-items: center;
             justify-content: center;
             padding: 24px 16px;
+            position: relative;
+            overflow: hidden;
+        }
+        /* Subtle radial glow — echoes the Notion "night" hero sticker constellation */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -20%; left: 50%;
+            transform: translateX(-50%);
+            width: 70vw; height: 70vw;
+            max-width: 700px; max-height: 700px;
+            background: radial-gradient(ellipse, rgba(0,117,222,.35) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -15%; right: 5%;
+            width: 40vw; height: 40vw;
+            max-width: 400px; max-height: 400px;
+            background: radial-gradient(ellipse, rgba(214,182,246,.12) 0%, transparent 70%);
+            pointer-events: none;
         }
         .g-brand {
             display: flex; align-items: center; gap: 10px;
-            margin-bottom: 28px; text-decoration: none; color: var(--n-ink);
+            margin-bottom: 28px; text-decoration: none; color: #fff;
+            position: relative; z-index: 1;
         }
         .g-brand-icon {
             width: 36px; height: 36px; border-radius: 8px;
-            background: var(--n-primary);
+            background: rgba(255,255,255,.2);
+            border: 1px solid rgba(255,255,255,.25);
             display: flex; align-items: center; justify-content: center;
             color: #fff; font-size: 18px;
+            backdrop-filter: blur(4px);
         }
         .g-brand-name {
-            font-size: 20px; font-weight: 700; letter-spacing: -0.25px;
+            font-size: 20px; font-weight: 700; letter-spacing: -0.25px; color: #fff;
         }
         .g-card {
             background: var(--n-surface);
