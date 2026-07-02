@@ -68,7 +68,7 @@
                                     <span class="indicator indicator-{{ $status }}"></span>
                                 </div>
                                 @if($plan)
-                                    <div class="text-muted" style="font-size:.68rem;line-height:1.2;margin-top:2px">
+                                    <div class="text-muted d-none d-sm-block" style="font-size:.68rem;line-height:1.2;margin-top:2px">
                                         {{ $plan->goals->count() }} goal
                                         · {{ $plan->activities->count() }} aktivitas
                                     </div>

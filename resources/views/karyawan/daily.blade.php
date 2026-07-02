@@ -11,6 +11,25 @@
     .priority-badge-tinggi { background: #fee2e2; color: #991b1b; border-radius: 4px; font-size:11px; font-weight:600; padding:2px 7px; }
     .priority-badge-sedang { background: #fef3c7; color: #92400e; border-radius: 4px; font-size:11px; font-weight:600; padding:2px 7px; }
     .priority-badge-rendah { background: #d1fae5; color: #065f46; border-radius: 4px; font-size:11px; font-weight:600; padding:2px 7px; }
+
+    @media (max-width: 767px) {
+        /* Description stacks full-width; controls + delete share the next row */
+        .goal-row .row > div:first-child,
+        .activity-row-item .row > div:first-child {
+            width: 100% !important; flex: 0 0 100% !important;
+        }
+        .goal-row .row > div:nth-child(2),
+        .activity-row-item .row > div:nth-child(2),
+        .activity-row-item .row > div:nth-child(3) {
+            flex: 1 1 0% !important; width: auto !important;
+        }
+        .goal-row .row > div:last-child,
+        .activity-row-item .row > div:last-child {
+            flex: 0 0 auto !important; width: auto !important;
+        }
+        .goal-row .btn-remove-goal,
+        .activity-row-item .btn-remove-activity { width: auto !important; }
+    }
 </style>
 @endpush
 
