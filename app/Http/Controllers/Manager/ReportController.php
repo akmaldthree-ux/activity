@@ -130,8 +130,9 @@ class ReportController extends Controller
         }
 
         $allHolidays = Holiday::whereBetween('date', [$weekStart->toDateString(), $weekEnd->toDateString()])
-            ->pluck('name', 'date')
-            ->mapKeys(fn($v, $k) => Carbon::parse($k)->format('Y-m-d'))
+            ->get()
+            ->keyBy(fn($h) => $h->date->format('Y-m-d'))
+            ->map(fn($h) => $h->name)
             ->all();
 
         $karyawans = User::where('role', 'karyawan')
