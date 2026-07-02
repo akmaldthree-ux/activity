@@ -94,7 +94,7 @@ Route::middleware('auth')->group(function () {
         Route::patch('users/{user}/toggle', [UserController::class, 'toggleActive'])->name('users.toggle');
         Route::get('holidays', [HolidayController::class, 'index'])->name('holidays.index');
         Route::post('holidays', [HolidayController::class, 'store'])->name('holidays.store');
-        Route::post('holidays/sync', [HolidayController::class, 'sync'])->name('holidays.sync');
+        Route::post('holidays/sync', [HolidayController::class, 'sync'])->name('holidays.sync'); // full: admin.holidays.sync
         Route::delete('holidays/{holiday}', [HolidayController::class, 'destroy'])->name('holidays.destroy');
         Route::resource('announcements', AnnouncementController::class);
     });

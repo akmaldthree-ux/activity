@@ -27,7 +27,7 @@
                     Ambil data hari libur nasional Indonesia secara otomatis dari
                     <strong>date.nager.at</strong>. Data yang sudah ada akan diperbarui.
                 </p>
-                <form action="{{ route('holidays.sync') }}" method="POST">
+                <form action="{{ route('admin.holidays.sync') }}" method="POST">
                     @csrf
                     <div class="input-group mb-3">
                         <select name="year" class="form-select">
