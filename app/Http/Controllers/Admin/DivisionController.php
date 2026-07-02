@@ -16,7 +16,7 @@ class DivisionController extends Controller
 
     public function create()
     {
-        return view('admin.divisions.form');
+        return view('admin.divisions.form', ['division' => null]);
     }
 
     public function store(Request $request)
