@@ -7,12 +7,50 @@
     <h5 class="fw-bold mb-0"><i class="bi bi-calendar-x me-2"></i>Hari Libur Nasional</h5>
 </div>
 
+@if(session('error'))
+    <div class="alert alert-danger alert-dismissible fade show">
+        <i class="bi bi-exclamation-triangle me-1"></i>{{ session('error') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+@endif
+
 <div class="row g-4">
-    {{-- Tambah Hari Libur --}}
+    {{-- Tambah & Sync --}}
     <div class="col-lg-4">
+        {{-- Sync Otomatis --}}
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white fw-semibold">
+                <i class="bi bi-cloud-download me-1"></i>Sync Kalender Nasional
+            </div>
+            <div class="card-body">
+                <p class="text-muted small mb-3">
+                    Ambil data hari libur nasional Indonesia secara otomatis dari
+                    <strong>date.nager.at</strong>. Data yang sudah ada akan diperbarui.
+                </p>
+                <form action="{{ route('holidays.sync') }}" method="POST">
+                    @csrf
+                    <div class="input-group mb-3">
+                        <select name="year" class="form-select">
+                            @foreach(range(now()->year - 1, now()->year + 2) as $y)
+                                <option value="{{ $y }}" @selected($y == now()->year)>{{ $y }}</option>
+                            @endforeach
+                        </select>
+                        <button type="submit" class="btn btn-success fw-semibold">
+                            <i class="bi bi-cloud-arrow-down me-1"></i>Sync
+                        </button>
+                    </div>
+                </form>
+                <div class="text-muted" style="font-size:.78rem">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Data: hari libur resmi pemerintah (libur nasional). Cuti bersama dapat ditambah manual.
+                </div>
+            </div>
+        </div>
+
+        {{-- Tambah Manual --}}
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-white fw-semibold">
-                <i class="bi bi-plus-circle me-1"></i>Tambah Hari Libur
+                <i class="bi bi-plus-circle me-1"></i>Tambah Manual
             </div>
             <div class="card-body">
                 <form action="{{ route('admin.holidays.store') }}" method="POST">
@@ -36,6 +74,7 @@
                     </div>
                 </form>
             </div>
+        </div>
         </div>
     </div>
 
