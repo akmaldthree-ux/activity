@@ -45,7 +45,7 @@ class DashboardController extends Controller
         $belumIsiHariIni = $totalKaryawan - $sudahIsiHariIni;
 
         // Per divisi (admin only)
-        $perDivisi = [];
+        $perDivisi = collect();
         if ($user->isAdmin()) {
             $perDivisi = User::where('role', 'karyawan')
                 ->where('is_active', true)
