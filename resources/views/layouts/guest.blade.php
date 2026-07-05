@@ -42,7 +42,7 @@
             justify-content: center;
             padding: 24px 16px;
             position: relative;
-            overflow: hidden;
+            overflow-x: hidden;
         }
         /* Subtle radial glow — echoes the Notion "night" hero sticker constellation */
         body::before {
