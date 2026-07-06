@@ -79,6 +79,13 @@ class AnnouncementSeeder extends Seeder
                 'division_id'  => null,
                 'published_at' => '2026-07-01 10:00:00',
             ],
+            [
+                'user_id'      => $adminId,
+                'title'        => 'Sosialisasi Sistem Daily Plan — Mulai Hari Ini',
+                'body'         => "Kepada seluruh karyawan yang terhormat,\n\nHari ini, " . now()->translatedFormat('d F Y') . ", sistem Daily Plan resmi mulai disosialisasikan ke seluruh divisi. Sistem ini bertujuan membantu setiap karyawan merencanakan aktivitas harian secara terstruktur dan memudahkan manager dalam memantau perkembangan tim.\n\nKewajiban pengisian:\n• Plan Pagi — setiap hari kerja sebelum pukul 09.00 WIB\n• Laporan Sore — setiap hari kerja sebelum pukul 20.00 WIB\n\nPanduan lengkap penggunaan sistem telah dibagikan kepada masing-masing kepala divisi. Pertanyaan dan kendala teknis dapat disampaikan langsung ke tim IT.\n\nMari kita mulai kebiasaan baik ini bersama-sama!",
+                'division_id'  => null,
+                'published_at' => now()->toDateTimeString(),
+            ],
         ];
 
         foreach ($announcements as $data) {

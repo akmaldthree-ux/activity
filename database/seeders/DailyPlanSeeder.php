@@ -166,14 +166,23 @@ class DailyPlanSeeder extends Seeder
 
     public function run(): void
     {
-        mt_srand(2026); // Fixed seed for reproducibility
+        // Seed changes per day so data feels fresh each run
+        mt_srand(crc32(Carbon::today('Asia/Jakarta')->toDateString()));
 
-        $profiles  = $this->buildProfiles();
-        $workdays  = $this->getWorkdays();
+        $profiles   = $this->buildProfiles();
+        $workdays   = $this->getWorkdays();   // yesterday and before
         $managerIds = $this->loadManagerIds();
+        $today      = Carbon::today('Asia/Jakarta');
 
         foreach ($profiles as $profile) {
             $this->seedPlans($profile, $workdays, $managerIds);
+        }
+
+        // Today: only morning plans, no reports yet (work in progress)
+        if (!$today->isWeekend() && !\App\Models\Holiday::isHoliday($today->toDateString())) {
+            foreach ($profiles as $profile) {
+                $this->seedTodayPlan($profile, $today->toDateString());
+            }
         }
     }
 
@@ -207,17 +216,19 @@ class DailyPlanSeeder extends Seeder
 
     private function getWorkdays(): array
     {
-        $holidays = [
-            '2026-05-01', '2026-05-14',
-            '2026-06-01', '2026-06-26',
-        ];
+        // Dynamic: always covers 10 weeks ending yesterday so data stays current
+        $end     = Carbon::yesterday('Asia/Jakarta');
+        $start   = $end->copy()->subWeeks(10)->startOfWeek(Carbon::MONDAY);
 
-        $days = [];
-        $current = Carbon::parse('2026-05-04');
-        $end     = Carbon::parse('2026-07-02');
+        $holidays = \App\Models\Holiday::whereBetween('date', [$start->toDateString(), $end->toDateString()])
+            ->pluck('date')
+            ->map(fn($d) => $d instanceof \Carbon\Carbon ? $d->toDateString() : (string) $d)
+            ->toArray();
 
+        $days    = [];
+        $current = $start->copy();
         while ($current->lte($end)) {
-            $d = $current->format('Y-m-d');
+            $d = $current->toDateString();
             if (!$current->isWeekend() && !in_array($d, $holidays)) {
                 $days[] = $d;
             }
@@ -247,18 +258,16 @@ class DailyPlanSeeder extends Seeder
         $managerId = $managerIds[$division] ?? null;
         $actPool   = $this->pool[$division] ?? $this->pool['IT & Pengembangan'];
         $goalPool  = $this->goalsByDivision[$division] ?? [];
-        $today     = '2026-07-02';
-
+        // All workdays passed here are past days (getWorkdays ends at yesterday)
         foreach ($workdays as $date) {
             if (mt_rand(1, 100) > $profile['plan_rate']) continue;
 
-            $isPast = $date < $today;
             $onTime = mt_rand(1, 100) <= $profile['ontime'];
 
             $planHour = $onTime ? mt_rand(7, 8) : mt_rand(9, 10);
             $planAt   = $date . ' ' . sprintf('%02d:%02d:00', $planHour, mt_rand(5, 55));
 
-            $hasReport  = $isPast && (mt_rand(1, 100) <= $profile['report_rate']);
+            $hasReport  = mt_rand(1, 100) <= $profile['report_rate'];
             $reportAt   = null;
             if ($hasReport) {
                 $repOnTime = mt_rand(1, 100) <= $profile['ontime'];
@@ -364,6 +373,55 @@ class DailyPlanSeeder extends Seeder
                         ]);
                     }
                 }
+            }
+        }
+    }
+
+    private function seedTodayPlan(array $profile, string $today): void
+    {
+        if (!$profile['user']) return;
+
+        // Only plan_rate% of karyawan have submitted plan this morning
+        if (mt_rand(1, 100) > $profile['plan_rate']) return;
+
+        $userId   = $profile['user']->id;
+        $division = $profile['division'];
+        $actPool  = $this->pool[$division] ?? $this->pool['IT & Pengembangan'];
+        $goalPool = $this->goalsByDivision[$division] ?? [];
+
+        $onTime   = mt_rand(1, 100) <= $profile['ontime'];
+        $planHour = $onTime ? mt_rand(7, 8) : mt_rand(9, 10);
+        $planAt   = $today . ' ' . sprintf('%02d:%02d:00', $planHour, mt_rand(5, 55));
+
+        $plan = DailyPlan::create([
+            'user_id'             => $userId,
+            'plan_date'           => $today,
+            'plan_submitted_at'   => $planAt,
+            'report_submitted_at' => null,
+            'insight'             => null,
+        ]);
+
+        $acts = $this->pickRandom($actPool, mt_rand(2, 4));
+        foreach ($acts as $act) {
+            Activity::create([
+                'daily_plan_id' => $plan->id,
+                'description'   => $act['desc'],
+                'tag'           => $act['tag'],
+                'priority'      => $act['priority'],
+                'status'        => null,
+                'realisasi'     => null,
+                'keterangan'    => null,
+            ]);
+        }
+
+        if (mt_rand(1, 10) <= 7 && $goalPool) {
+            $goals = $this->pickRandom($goalPool, mt_rand(1, 2));
+            foreach ($goals as $g) {
+                Goal::create([
+                    'daily_plan_id' => $plan->id,
+                    'description'   => $g['desc'],
+                    'target'        => $g['target'],
+                ]);
             }
         }
     }
