@@ -55,12 +55,23 @@
             </div>
 
             <div class="col-md-6">
+                <label class="form-label">Role / Tingkatan</label>
+                <select name="role" class="form-select" required>
+                    <option value="">-- Pilih Role --</option>
+                    <option value="karyawan" {{ old('role') === 'karyawan' ? 'selected' : '' }}>Karyawan</option>
+                    <option value="leader"   {{ old('role') === 'leader'   ? 'selected' : '' }}>Leader</option>
+                    <option value="manager"  {{ old('role') === 'manager'  ? 'selected' : '' }}>Manager</option>
+                    <option value="direksi"  {{ old('role') === 'direksi'  ? 'selected' : '' }}>Direksi</option>
+                </select>
+            </div>
+
+            <div class="col-md-6">
                 <label class="form-label">Jabatan / Posisi</label>
                 <input type="text" name="jabatan" class="form-control"
                        placeholder="Contoh: Staff IT" value="{{ old('jabatan') }}" required>
             </div>
 
-            <div class="col-12">
+            <div class="col-md-6">
                 <label class="form-label">Nomor HP / WhatsApp</label>
                 <input type="text" name="no_hp" class="form-control"
                        placeholder="08xxxxxxxxxx" value="{{ old('no_hp') }}" required>

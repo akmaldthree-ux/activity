@@ -25,6 +25,7 @@ class RegisterController extends Controller
             'email'                 => ['required', 'email', 'unique:users'],
             'password'              => ['required', 'string', 'min:8', 'confirmed'],
             'division_id'           => ['required', 'exists:divisions,id'],
+            'role'                  => ['required', 'in:karyawan,leader,manager,direksi'],
             'jabatan'               => ['required', 'string', 'max:255'],
             'no_hp'                 => ['required', 'string', 'max:20'],
         ]);
@@ -33,7 +34,7 @@ class RegisterController extends Controller
             'name'        => $data['name'],
             'email'       => $data['email'],
             'password'    => Hash::make($data['password']),
-            'role'        => 'karyawan',
+            'role'        => $data['role'],
             'division_id' => $data['division_id'],
             'jabatan'     => $data['jabatan'],
             'no_hp'       => $data['no_hp'],
@@ -41,12 +42,15 @@ class RegisterController extends Controller
             'is_active'   => false,
         ]);
 
-        // Kirim email notifikasi ke manager divisi & admin
-        $managers = User::where(function ($q) use ($user) {
-                $q->where('role', 'manager')->where('division_id', $user->division_id);
+        // Notif ke admin; tambah manager divisi jika pendaftar adalah karyawan/leader
+        $managers = User::where('is_active', true)
+            ->where(function ($q) use ($user) {
+                $q->where('role', 'admin');
+                if (in_array($user->role, ['karyawan', 'leader'])) {
+                    $q->orWhere(fn($q2) => $q2->where('role', 'manager')
+                                              ->where('division_id', $user->division_id));
+                }
             })
-            ->orWhere('role', 'admin')
-            ->where('is_active', true)
             ->get();
 
         try {
