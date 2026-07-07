@@ -27,7 +27,6 @@ class RegisterController extends Controller
             'division_id'           => ['required', 'exists:divisions,id'],
             'role'                  => ['required', 'in:karyawan,leader,manager,direksi'],
             'jabatan'               => ['required', 'string', 'max:255'],
-            'no_hp'                 => ['required', 'string', 'max:20'],
         ]);
 
         $user = User::create([
@@ -37,7 +36,6 @@ class RegisterController extends Controller
             'role'        => $data['role'],
             'division_id' => $data['division_id'],
             'jabatan'     => $data['jabatan'],
-            'no_hp'       => $data['no_hp'],
             'status'      => 'pending',
             'is_active'   => false,
         ]);

@@ -65,16 +65,10 @@
                 </select>
             </div>
 
-            <div class="col-md-6">
+            <div class="col-12">
                 <label class="form-label">Jabatan / Posisi</label>
                 <input type="text" name="jabatan" class="form-control"
-                       placeholder="Contoh: Staff IT" value="{{ old('jabatan') }}" required>
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label">Nomor HP / WhatsApp</label>
-                <input type="text" name="no_hp" class="form-control"
-                       placeholder="08xxxxxxxxxx" value="{{ old('no_hp') }}" required>
+                       placeholder="Contoh: Shopee Advertiser" value="{{ old('jabatan') }}" required>
             </div>
 
             <div class="col-12 mt-1">
