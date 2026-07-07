@@ -16,7 +16,9 @@
         <select name="role" class="form-select form-select-sm">
             <option value="">Semua Role</option>
             <option value="karyawan" {{ request('role')=='karyawan'?'selected':'' }}>Karyawan</option>
+            <option value="leader"   {{ request('role')=='leader'  ?'selected':'' }}>Leader</option>
             <option value="manager"  {{ request('role')=='manager' ?'selected':'' }}>Manager</option>
+            <option value="direksi"  {{ request('role')=='direksi' ?'selected':'' }}>Direksi</option>
             <option value="admin"    {{ request('role')=='admin'   ?'selected':'' }}>Admin</option>
         </select>
     </div>
@@ -54,9 +56,16 @@
                         <td class="fw-semibold">{{ $user->name }}</td>
                         <td class="d-none d-md-table-cell small text-muted">{{ $user->email }}</td>
                         <td>
-                            <span class="badge {{ $user->role=='admin' ? 'bg-danger' : ($user->role=='manager' ? 'bg-warning' : 'bg-primary') }}">
-                                {{ $user->roleLabel() }}
-                            </span>
+                            @php
+                                $badgeClass = match($user->role) {
+                                    'admin'    => 'bg-danger',
+                                    'direksi'  => 'bg-dark',
+                                    'manager'  => 'bg-warning text-dark',
+                                    'leader'   => 'bg-info text-dark',
+                                    default    => 'bg-primary',
+                                };
+                            @endphp
+                            <span class="badge {{ $badgeClass }}">{{ $user->roleLabel() }}</span>
                         </td>
                         <td class="d-none d-md-table-cell small">{{ $user->division?->name ?? '—' }}</td>
                         <td class="text-center">
