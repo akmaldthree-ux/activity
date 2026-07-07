@@ -54,7 +54,7 @@ class MonitoringController extends Controller
         $supervisor = Auth::user();
 
         // Otorisasi: user harus langsung reports_to supervisor, atau supervisor adalah admin
-        if (!$supervisor->isAdmin() && $user->reports_to !== $supervisor->id) {
+        if (!$supervisor->isAdmin() && (int) $user->reports_to !== $supervisor->id) {
             abort(403);
         }
 
@@ -74,7 +74,7 @@ class MonitoringController extends Controller
         $supervisor = Auth::user();
 
         // Otorisasi: hanya atasan langsung atau admin yang boleh beri feedback
-        if (!$supervisor->isAdmin() && $dailyPlan->user->reports_to !== $supervisor->id) {
+        if (!$supervisor->isAdmin() && (int) $dailyPlan->user->reports_to !== $supervisor->id) {
             abort(403);
         }
 
