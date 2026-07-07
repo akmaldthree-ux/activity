@@ -49,8 +49,12 @@ class RegisterController extends Controller
             ->where('is_active', true)
             ->get();
 
-        foreach ($managers as $manager) {
-            Mail::to($manager->email)->queue(new NewRegistrationMail($manager, $user));
+        try {
+            foreach ($managers as $manager) {
+                Mail::to($manager->email)->queue(new NewRegistrationMail($manager, $user));
+            }
+        } catch (\Exception $e) {
+            \Log::warning('Registration notification mail failed: ' . $e->getMessage());
         }
 
         return redirect()->route('login')

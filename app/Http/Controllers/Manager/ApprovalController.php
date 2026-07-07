@@ -54,7 +54,11 @@ class ApprovalController extends Controller
 
         // Admin level: final approval
         $user->update(['status' => 'active', 'is_active' => true]);
-        Mail::to($user->email)->queue(new AccountApprovedMail($user));
+        try {
+            Mail::to($user->email)->queue(new AccountApprovedMail($user));
+        } catch (\Exception $e) {
+            \Log::warning('Approval mail failed: ' . $e->getMessage());
+        }
         return back()->with('success', "Akun {$user->name} berhasil disetujui dan aktif.");
     }
 
@@ -76,7 +80,11 @@ class ApprovalController extends Controller
             'rejection_reason' => $request->rejection_reason,
         ]);
 
-        Mail::to($user->email)->queue(new AccountRejectedMail($user));
+        try {
+            Mail::to($user->email)->queue(new AccountRejectedMail($user));
+        } catch (\Exception $e) {
+            \Log::warning('Rejection mail failed: ' . $e->getMessage());
+        }
 
         return back()->with('success', "Akun {$user->name} ditolak.");
     }
