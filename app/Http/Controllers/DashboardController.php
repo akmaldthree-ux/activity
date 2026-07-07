@@ -21,10 +21,8 @@ class DashboardController extends Controller
             return redirect()->route('karyawan.kalender');
         }
 
-        // Tentukan scope bawahan berdasarkan reports_to
-        // Admin: semua karyawan aktif (behaviour lama)
-        // Direksi/Manager/Leader: direct reports saja
-        if ($user->isAdmin()) {
+        // Admin/Direksi: semua karyawan; lainnya: direct reports saja
+        if ($user->isAdmin() || $user->isDireksi()) {
             $usersQuery = User::where('role', 'karyawan')
                 ->where('is_active', true)
                 ->with('division');
@@ -54,9 +52,7 @@ class DashboardController extends Controller
         // Rekap per divisi — hanya untuk admin & direksi (lintas divisi)
         $perDivisi = collect();
         if ($user->isAdmin() || $user->isDireksi()) {
-            $scope = $user->isAdmin()
-                ? User::where('role', 'karyawan')->where('is_active', true)->with('division')->get()
-                : User::where('reports_to', $user->id)->where('is_active', true)->with('division')->get();
+            $scope = User::where('role', 'karyawan')->where('is_active', true)->with('division')->get();
 
             $perDivisi = $scope
                 ->groupBy('division_id')
