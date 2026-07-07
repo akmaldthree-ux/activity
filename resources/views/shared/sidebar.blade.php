@@ -1,5 +1,5 @@
 <ul style="list-style:none;padding:0;margin:0">
-    @if(Auth::user()->isKaryawan())
+    @if(Auth::user()->canFillPlan())
     <li class="n-nav-item">
         <a href="{{ route('karyawan.kalender') }}" class="{{ request()->routeIs('karyawan.kalender*') ? 'active' : '' }}">
             <i class="bi bi-calendar3"></i> Kalender Saya
@@ -13,7 +13,7 @@
         </a>
     </li>
 
-    @if(Auth::user()->isManager() || Auth::user()->isAdmin())
+    @if(Auth::user()->canMonitor())
     <div class="n-nav-divider"></div>
     <li class="n-nav-item">
         <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
@@ -45,6 +45,7 @@
             <i class="bi bi-bullseye"></i> Target Bulanan
         </a>
     </li>
+    @if(Auth::user()->isManager() || Auth::user()->isAdmin())
     <li class="n-nav-item">
         @php $pendingCount = \App\Models\User::where('status','pending')->when(Auth::user()->isManager(), fn($q) => $q->where('division_id', Auth::user()->division_id))->count(); @endphp
         <a href="{{ route('approval.index') }}" class="{{ request()->routeIs('approval*') ? 'active' : '' }}">
@@ -54,6 +55,7 @@
             @endif
         </a>
     </li>
+    @endif
     @endif
 
     @if(Auth::user()->isAdmin())

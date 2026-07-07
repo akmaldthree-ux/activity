@@ -26,8 +26,9 @@ class UserController extends Controller
 
     public function create()
     {
-        $divisions = Division::orderBy('name')->get();
-        return view('admin.users.form', compact('divisions') + ['user' => null]);
+        $divisions  = Division::orderBy('name')->get();
+        $supervisors = User::whereIn('role', ['leader', 'manager', 'direksi', 'admin'])->orderBy('name')->get();
+        return view('admin.users.form', compact('divisions', 'supervisors') + ['user' => null]);
     }
 
     public function store(Request $request)
@@ -36,8 +37,9 @@ class UserController extends Controller
             'name'        => ['required', 'string', 'max:255'],
             'email'       => ['required', 'email', 'unique:users'],
             'password'    => ['required', 'string', 'min:8'],
-            'role'        => ['required', 'in:karyawan,manager,admin'],
+            'role'        => ['required', 'in:karyawan,leader,manager,direksi,admin'],
             'division_id' => ['nullable', 'exists:divisions,id'],
+            'reports_to'  => ['nullable', 'exists:users,id'],
         ]);
 
         $data['password']  = Hash::make($data['password']);
@@ -49,8 +51,9 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
-        $divisions = Division::orderBy('name')->get();
-        return view('admin.users.form', compact('user', 'divisions'));
+        $divisions   = Division::orderBy('name')->get();
+        $supervisors = User::whereIn('role', ['leader', 'manager', 'direksi', 'admin'])->where('id', '!=', $user->id)->orderBy('name')->get();
+        return view('admin.users.form', compact('user', 'divisions', 'supervisors'));
     }
 
     public function update(Request $request, User $user)
@@ -59,8 +62,9 @@ class UserController extends Controller
             'name'        => ['required', 'string', 'max:255'],
             'email'       => ['required', 'email', Rule::unique('users')->ignore($user->id)],
             'password'    => ['nullable', 'string', 'min:8'],
-            'role'        => ['required', 'in:karyawan,manager,admin'],
+            'role'        => ['required', 'in:karyawan,leader,manager,direksi,admin'],
             'division_id' => ['nullable', 'exists:divisions,id'],
+            'reports_to'  => ['nullable', 'exists:users,id'],
         ]);
 
         if (empty($data['password'])) {

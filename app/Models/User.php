@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -12,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password', 'role', 'division_id', 'is_active', 'jabatan', 'no_hp', 'photo', 'status', 'rejection_reason'])]
+#[Fillable(['name', 'email', 'password', 'role', 'division_id', 'reports_to', 'is_active', 'jabatan', 'no_hp', 'photo', 'status', 'rejection_reason'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -20,7 +19,9 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     public const ROLE_KARYAWAN = 'karyawan';
+    public const ROLE_LEADER   = 'leader';
     public const ROLE_MANAGER  = 'manager';
+    public const ROLE_DIREKSI  = 'direksi';
     public const ROLE_ADMIN    = 'admin';
 
     public const STATUS_PENDING           = 'pending';
@@ -37,9 +38,21 @@ class User extends Authenticatable
         ];
     }
 
+    // ── Relationships ────────────────────────────────────────────────────
+
     public function division(): BelongsTo
     {
         return $this->belongsTo(Division::class);
+    }
+
+    public function supervisor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'reports_to');
+    }
+
+    public function subordinates(): HasMany
+    {
+        return $this->hasMany(User::class, 'reports_to');
     }
 
     public function dailyPlans(): HasMany
@@ -47,9 +60,16 @@ class User extends Authenticatable
         return $this->hasMany(DailyPlan::class);
     }
 
+    // ── Role checks ──────────────────────────────────────────────────────
+
     public function isAdmin(): bool
     {
         return $this->role === self::ROLE_ADMIN;
+    }
+
+    public function isDireksi(): bool
+    {
+        return $this->role === self::ROLE_DIREKSI;
     }
 
     public function isManager(): bool
@@ -57,10 +77,29 @@ class User extends Authenticatable
         return $this->role === self::ROLE_MANAGER;
     }
 
+    public function isLeader(): bool
+    {
+        return $this->role === self::ROLE_LEADER;
+    }
+
     public function isKaryawan(): bool
     {
         return $this->role === self::ROLE_KARYAWAN;
     }
+
+    /** True if this user must fill a daily plan. */
+    public function canFillPlan(): bool
+    {
+        return in_array($this->role, [self::ROLE_KARYAWAN, self::ROLE_LEADER, self::ROLE_MANAGER]);
+    }
+
+    /** True if this user can monitor subordinates. */
+    public function canMonitor(): bool
+    {
+        return in_array($this->role, [self::ROLE_LEADER, self::ROLE_MANAGER, self::ROLE_DIREKSI, self::ROLE_ADMIN]);
+    }
+
+    // ── Status checks ────────────────────────────────────────────────────
 
     public function isPending(): bool
     {
@@ -82,11 +121,15 @@ class User extends Authenticatable
         return $this->status === self::STATUS_REJECTED;
     }
 
+    // ── Labels ───────────────────────────────────────────────────────────
+
     public function roleLabel(): string
     {
         return match ($this->role) {
             self::ROLE_ADMIN   => 'Admin',
+            self::ROLE_DIREKSI => 'Direksi',
             self::ROLE_MANAGER => 'Manager',
+            self::ROLE_LEADER  => 'Leader',
             default            => 'Karyawan',
         };
     }

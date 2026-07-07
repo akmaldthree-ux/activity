@@ -36,16 +36,29 @@
                 <label class="form-label fw-semibold">Role</label>
                 <select name="role" class="form-select" required>
                     <option value="karyawan" {{ old('role', $user?->role)=='karyawan'?'selected':'' }}>Karyawan</option>
+                    <option value="leader"   {{ old('role', $user?->role)=='leader'  ?'selected':'' }}>Leader</option>
                     <option value="manager"  {{ old('role', $user?->role)=='manager' ?'selected':'' }}>Manager</option>
+                    <option value="direksi"  {{ old('role', $user?->role)=='direksi' ?'selected':'' }}>Direksi</option>
                     <option value="admin"    {{ old('role', $user?->role)=='admin'   ?'selected':'' }}>Admin</option>
                 </select>
             </div>
-            <div class="mb-4">
+            <div class="mb-3">
                 <label class="form-label fw-semibold">Divisi</label>
                 <select name="division_id" class="form-select">
                     <option value="">— Tanpa Divisi —</option>
                     @foreach($divisions as $div)
                     <option value="{{ $div->id }}" {{ old('division_id', $user?->division_id)==$div->id?'selected':'' }}>{{ $div->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="mb-4">
+                <label class="form-label fw-semibold">Atasan Langsung (Reports To)</label>
+                <select name="reports_to" class="form-select">
+                    <option value="">— Tidak Ada —</option>
+                    @foreach($supervisors as $sup)
+                    <option value="{{ $sup->id }}" {{ old('reports_to', $user?->reports_to)==$sup->id?'selected':'' }}>
+                        {{ $sup->name }} ({{ $sup->roleLabel() }})
+                    </option>
                     @endforeach
                 </select>
             </div>

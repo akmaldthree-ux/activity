@@ -17,7 +17,6 @@ class ReportController extends Controller
     public function kinerja(Request $request)
     {
         $manager    = Auth::user();
-        $divisionId = $manager->isAdmin() ? null : $manager->division_id;
 
         $year  = $request->integer('year', now()->year);
         $month = $request->integer('month', now()->month);
@@ -25,12 +24,7 @@ class ReportController extends Controller
         $start = Carbon::create($year, $month, 1, 0, 0, 0, 'Asia/Jakarta');
         $end   = $start->copy()->endOfMonth();
 
-        $karyawans = User::where('role', 'karyawan')
-            ->where('is_active', true)
-            ->when($divisionId, fn($q) => $q->where('division_id', $divisionId))
-            ->with('division')
-            ->orderBy('name')
-            ->get();
+        $karyawans = $this->getSubordinates($manager)->with('division')->orderBy('name')->get();
 
         $workdays = $this->countWorkdays($start, $end);
 
@@ -65,7 +59,7 @@ class ReportController extends Controller
     public function leaderboard(Request $request)
     {
         $manager    = Auth::user();
-        $divisionId = $manager->isAdmin() ? null : $manager->division_id;
+        $divisionId = ($manager->isAdmin() || $manager->isDireksi()) ? null : $manager->division_id;
 
         $year  = $request->integer('year', now()->year);
         $month = $request->integer('month', now()->month);
@@ -107,7 +101,6 @@ class ReportController extends Controller
     public function weekly(Request $request)
     {
         $manager    = Auth::user();
-        $divisionId = $manager->isAdmin() ? null : $manager->division_id;
 
         // Default to current week
         $weekInput = $request->input('week', now()->format('Y-\WW'));
@@ -135,12 +128,7 @@ class ReportController extends Controller
             ->map(fn($h) => $h->name)
             ->all();
 
-        $karyawans = User::where('role', 'karyawan')
-            ->where('is_active', true)
-            ->when($divisionId, fn($q) => $q->where('division_id', $divisionId))
-            ->with('division')
-            ->orderBy('name')
-            ->get();
+        $karyawans = $this->getSubordinates($manager)->with('division')->orderBy('name')->get();
 
         $workdays = count(array_filter($weekDays, fn($d) => !isset($allHolidays[$d->format('Y-m-d')])));
 
@@ -167,6 +155,14 @@ class ReportController extends Controller
         return view('manager.weekly-report', compact(
             'rekap', 'weekStart', 'weekEnd', 'weekDays', 'weekInput', 'totalKaryawan'
         ));
+    }
+
+    private function getSubordinates(User $manager): \Illuminate\Database\Eloquent\Builder
+    {
+        if ($manager->isAdmin()) {
+            return User::where('role', 'karyawan')->where('is_active', true);
+        }
+        return User::where('reports_to', $manager->id)->where('is_active', true);
     }
 
     private function countWorkdays(Carbon $start, Carbon $end): int

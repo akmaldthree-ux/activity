@@ -14,7 +14,7 @@ class DivisionTargetController extends Controller
     public function index(Request $request)
     {
         $manager    = Auth::user();
-        $divisionId = $manager->isAdmin() ? null : $manager->division_id;
+        $divisionId = ($manager->isAdmin() || $manager->isDireksi()) ? null : $manager->division_id;
 
         $year  = $request->integer('year', now()->year);
         $month = $request->integer('month', now()->month);
@@ -45,8 +45,8 @@ class DivisionTargetController extends Controller
             'note'             => ['nullable', 'string', 'max:500'],
         ]);
 
-        // Manager hanya bisa set target divisinya sendiri
-        if ($manager->isManager() && $request->division_id != $manager->division_id) {
+        // Admin dan Direksi bebas set semua divisi; lainnya hanya divisi sendiri
+        if (!$manager->isAdmin() && !$manager->isDireksi() && $request->division_id != $manager->division_id) {
             abort(403);
         }
 

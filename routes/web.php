@@ -33,8 +33,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Karyawan (juga bisa diakses manager/admin untuk lihat kalender diri sendiri)
-    Route::prefix('kalender')->name('karyawan.')->middleware('role:karyawan,manager,admin')->group(function () {
+    // Kalender & plan harian — semua yang wajib isi plan (karyawan, leader, manager)
+    Route::prefix('kalender')->name('karyawan.')->middleware('role:karyawan,leader,manager,admin')->group(function () {
         Route::get('/', [DailyPlanController::class, 'index'])->name('kalender');
         Route::get('/{date}', [DailyPlanController::class, 'show'])->name('daily');
         Route::post('/{date}/plan', [DailyPlanController::class, 'storePlan'])->name('plan.store');
@@ -42,14 +42,14 @@ Route::middleware('auth')->group(function () {
     });
 
     // Template aktivitas (JSON API)
-    Route::prefix('templates')->name('templates.')->middleware('role:karyawan,manager,admin')->group(function () {
+    Route::prefix('templates')->name('templates.')->middleware('role:karyawan,leader,manager,admin')->group(function () {
         Route::get('/', [ActivityTemplateController::class, 'index'])->name('index');
         Route::post('/', [ActivityTemplateController::class, 'store'])->name('store');
         Route::delete('/{template}', [ActivityTemplateController::class, 'destroy'])->name('destroy');
     });
 
-    // Laporan & Leaderboard
-    Route::middleware('role:manager,admin')->group(function () {
+    // Laporan & Leaderboard — semua yang bisa monitor
+    Route::middleware('role:leader,manager,direksi,admin')->group(function () {
         Route::get('/kinerja', [ReportController::class, 'kinerja'])->name('kinerja.index');
         Route::get('/leaderboard', [ReportController::class, 'leaderboard'])->name('leaderboard.index');
         Route::get('/rekap-mingguan', [ReportController::class, 'weekly'])->name('report.weekly');
@@ -57,8 +57,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/targets', [DivisionTargetController::class, 'store'])->name('targets.store');
     });
 
-    // Manager / Admin: monitoring tim
-    Route::prefix('monitoring')->name('monitoring.')->middleware('role:manager,admin')->group(function () {
+    // Monitoring tim
+    Route::prefix('monitoring')->name('monitoring.')->middleware('role:leader,manager,direksi,admin')->group(function () {
         Route::get('/tim', [MonitoringController::class, 'tim'])->name('tim');
         Route::get('/tim/{user}/{date}', [MonitoringController::class, 'detail'])->name('detail');
         Route::post('/feedback/{dailyPlan}', [MonitoringController::class, 'saveFeedback'])->name('feedback');
@@ -67,7 +67,7 @@ Route::middleware('auth')->group(function () {
     // Feedback reply (semua role bisa balas)
     Route::post('/feedback/{feedback}/reply', [MonitoringController::class, 'replyFeedback'])->name('feedback.reply');
 
-    // Manager / Admin: persetujuan akun
+    // Persetujuan akun — manager & admin (leader tidak ikut approval flow)
     Route::prefix('approval')->name('approval.')->middleware('role:manager,admin')->group(function () {
         Route::get('/', [ApprovalController::class, 'index'])->name('index');
         Route::patch('/{user}/approve', [ApprovalController::class, 'approve'])->name('approve');
@@ -94,7 +94,7 @@ Route::middleware('auth')->group(function () {
         Route::patch('users/{user}/toggle', [UserController::class, 'toggleActive'])->name('users.toggle');
         Route::get('holidays', [HolidayController::class, 'index'])->name('holidays.index');
         Route::post('holidays', [HolidayController::class, 'store'])->name('holidays.store');
-        Route::post('holidays/sync', [HolidayController::class, 'sync'])->name('holidays.sync'); // full: admin.holidays.sync
+        Route::post('holidays/sync', [HolidayController::class, 'sync'])->name('holidays.sync');
         Route::delete('holidays/{holiday}', [HolidayController::class, 'destroy'])->name('holidays.destroy');
         Route::resource('announcements', AnnouncementController::class);
     });

@@ -191,7 +191,19 @@ class DailyPlanSeeder extends Seeder
         $get = fn($email) => User::where('email', $email)->first();
 
         return [
-            // IT - Kepatuhan tinggi → sedang → rendah
+            // Leaders (high compliance — they set the example)
+            ['user' => $get('leader.it@dailyplan.id'),  'division' => 'IT & Pengembangan', 'plan_rate' => 95, 'report_rate' => 92, 'ontime' => 90],
+            ['user' => $get('leader.mkt@dailyplan.id'), 'division' => 'Marketing',          'plan_rate' => 93, 'report_rate' => 90, 'ontime' => 88],
+            ['user' => $get('leader.ops@dailyplan.id'), 'division' => 'Operasional',        'plan_rate' => 91, 'report_rate' => 87, 'ontime' => 85],
+            ['user' => $get('leader.hrd@dailyplan.id'), 'division' => 'HRD',                'plan_rate' => 94, 'report_rate' => 91, 'ontime' => 89],
+            ['user' => $get('leader.keu@dailyplan.id'), 'division' => 'Keuangan',           'plan_rate' => 96, 'report_rate' => 93, 'ontime' => 91],
+            // Managers (very high compliance)
+            ['user' => $get('manager.it@dailyplan.id'),  'division' => 'IT & Pengembangan', 'plan_rate' => 97, 'report_rate' => 94, 'ontime' => 93],
+            ['user' => $get('manager.mkt@dailyplan.id'), 'division' => 'Marketing',          'plan_rate' => 95, 'report_rate' => 92, 'ontime' => 90],
+            ['user' => $get('manager.ops@dailyplan.id'), 'division' => 'Operasional',        'plan_rate' => 98, 'report_rate' => 95, 'ontime' => 94],
+            ['user' => $get('manager.hrd@dailyplan.id'), 'division' => 'HRD',                'plan_rate' => 96, 'report_rate' => 93, 'ontime' => 92],
+            ['user' => $get('manager.keu@dailyplan.id'), 'division' => 'Keuangan',           'plan_rate' => 97, 'report_rate' => 94, 'ontime' => 93],
+            // IT Karyawan — Kepatuhan tinggi → sedang → rendah
             ['user' => $get('andi@dailyplan.id'),    'division' => 'IT & Pengembangan', 'plan_rate' => 92, 'report_rate' => 88, 'ontime' => 85],
             ['user' => $get('rina@dailyplan.id'),    'division' => 'IT & Pengembangan', 'plan_rate' => 76, 'report_rate' => 72, 'ontime' => 62],
             ['user' => $get('fajar@dailyplan.id'),   'division' => 'IT & Pengembangan', 'plan_rate' => 48, 'report_rate' => 42, 'ontime' => 50],
@@ -240,12 +252,26 @@ class DailyPlanSeeder extends Seeder
 
     private function loadManagerIds(): array
     {
+        $direksiId = User::where('email', 'direksi@dailyplan.id')->value('id');
         return [
-            'IT & Pengembangan' => User::where('email', 'manager.it@dailyplan.id')->value('id'),
-            'Marketing'         => User::where('email', 'manager.mkt@dailyplan.id')->value('id'),
-            'Operasional'       => User::where('email', 'manager.ops@dailyplan.id')->value('id'),
-            'HRD'               => User::where('email', 'manager.hrd@dailyplan.id')->value('id'),
-            'Keuangan'          => User::where('email', 'manager.keu@dailyplan.id')->value('id'),
+            // Karyawan get feedback from their leader
+            'karyawan_IT & Pengembangan' => User::where('email', 'leader.it@dailyplan.id')->value('id'),
+            'karyawan_Marketing'         => User::where('email', 'leader.mkt@dailyplan.id')->value('id'),
+            'karyawan_Operasional'       => User::where('email', 'leader.ops@dailyplan.id')->value('id'),
+            'karyawan_HRD'               => User::where('email', 'leader.hrd@dailyplan.id')->value('id'),
+            'karyawan_Keuangan'          => User::where('email', 'leader.keu@dailyplan.id')->value('id'),
+            // Leaders get feedback from their manager
+            'leader_IT & Pengembangan'   => User::where('email', 'manager.it@dailyplan.id')->value('id'),
+            'leader_Marketing'           => User::where('email', 'manager.mkt@dailyplan.id')->value('id'),
+            'leader_Operasional'         => User::where('email', 'manager.ops@dailyplan.id')->value('id'),
+            'leader_HRD'                 => User::where('email', 'manager.hrd@dailyplan.id')->value('id'),
+            'leader_Keuangan'            => User::where('email', 'manager.keu@dailyplan.id')->value('id'),
+            // Managers get feedback from direksi
+            'manager_IT & Pengembangan'  => $direksiId,
+            'manager_Marketing'          => $direksiId,
+            'manager_Operasional'        => $direksiId,
+            'manager_HRD'                => $direksiId,
+            'manager_Keuangan'           => $direksiId,
         ];
     }
 
@@ -255,7 +281,8 @@ class DailyPlanSeeder extends Seeder
 
         $userId    = $profile['user']->id;
         $division  = $profile['division'];
-        $managerId = $managerIds[$division] ?? null;
+        $role      = $profile['user']->role;
+        $managerId = $managerIds["{$role}_{$division}"] ?? null;
         $actPool   = $this->pool[$division] ?? $this->pool['IT & Pengembangan'];
         $goalPool  = $this->goalsByDivision[$division] ?? [];
         // All workdays passed here are past days (getWorkdays ends at yesterday)

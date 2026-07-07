@@ -17,31 +17,31 @@ class MonitoringController extends Controller
     public function tim(Request $request)
     {
         $user = Auth::user();
-        $divisionId = $user->isAdmin() ? null : $user->division_id;
 
         $now    = Carbon::now('Asia/Jakarta');
         $date   = $request->get('date', $now->toDateString());
         $parsed = Carbon::parse($date, 'Asia/Jakarta');
 
-        $karyawans = User::where('role', 'karyawan')
-            ->where('is_active', true)
-            ->when($divisionId, fn($q) => $q->where('division_id', $divisionId))
-            ->with('division')
-            ->orderBy('name')
-            ->get();
+        // Admin: semua karyawan; lainnya: direct reports saja
+        $subordinatesQuery = $user->isAdmin()
+            ? User::where('role', 'karyawan')->where('is_active', true)
+            : User::where('reports_to', $user->id)->where('is_active', true);
 
-        $karyawanIds = $karyawans->pluck('id');
+        $subordinates = $subordinatesQuery->with('division')->orderBy('name')->get();
+        $subordinateIds = $subordinates->pluck('id');
 
         $plans = DailyPlan::with(['goals', 'activities', 'feedback'])
-            ->whereIn('user_id', $karyawanIds)
+            ->whereIn('user_id', $subordinateIds)
             ->whereDate('plan_date', $parsed)
             ->get()
             ->keyBy('user_id');
 
-        // Statistik ringkas
-        $total    = $karyawans->count();
+        $total     = $subordinates->count();
         $sudahPlan = $plans->whereNotNull('plan_submitted_at')->count();
         $lengkap   = $plans->whereNotNull('report_submitted_at')->count();
+
+        // Alias untuk view (view masih pakai $karyawans)
+        $karyawans = $subordinates;
 
         return view('manager.tim', compact(
             'karyawans', 'plans', 'date', 'parsed',
@@ -51,10 +51,10 @@ class MonitoringController extends Controller
 
     public function detail(User $user, string $date)
     {
-        $manager = Auth::user();
+        $supervisor = Auth::user();
 
-        // Manager hanya bisa lihat divisinya sendiri
-        if ($manager->isManager() && $user->division_id !== $manager->division_id) {
+        // Otorisasi: user harus langsung reports_to supervisor, atau supervisor adalah admin
+        if (!$supervisor->isAdmin() && $user->reports_to !== $supervisor->id) {
             abort(403);
         }
 
@@ -71,10 +71,10 @@ class MonitoringController extends Controller
 
     public function saveFeedback(Request $request, DailyPlan $dailyPlan)
     {
-        $manager = Auth::user();
+        $supervisor = Auth::user();
 
-        // Pastikan karyawan dalam divisi manager
-        if ($manager->isManager() && $dailyPlan->user->division_id !== $manager->division_id) {
+        // Otorisasi: hanya atasan langsung atau admin yang boleh beri feedback
+        if (!$supervisor->isAdmin() && $dailyPlan->user->reports_to !== $supervisor->id) {
             abort(403);
         }
 
@@ -86,17 +86,16 @@ class MonitoringController extends Controller
         Feedback::updateOrCreate(
             ['daily_plan_id' => $dailyPlan->id],
             [
-                'manager_id' => $manager->id,
+                'manager_id' => $supervisor->id,
                 'comment'    => $request->comment,
                 'rating'     => $request->rating,
             ]
         );
 
-        // Notifikasi ke karyawan
         InAppNotification::create([
             'user_id' => $dailyPlan->user_id,
             'type'    => 'feedback',
-            'title'   => 'Feedback baru dari ' . $manager->name,
+            'title'   => 'Feedback baru dari ' . $supervisor->name,
             'body'    => $request->comment ? \Illuminate\Support\Str::limit($request->comment, 80) : null,
             'url'     => route('karyawan.daily', $dailyPlan->plan_date->format('Y-m-d')),
         ]);

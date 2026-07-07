@@ -13,7 +13,6 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
-        // Truncate transactional tables before re-seeding so data stays clean
         Schema::disableForeignKeyConstraints();
         DB::table('in_app_notifications')->truncate();
         DB::table('division_targets')->truncate();
@@ -26,9 +25,11 @@ class DatabaseSeeder extends Seeder
         DB::table('goals')->truncate();
         DB::table('daily_plans')->truncate();
         DB::table('holidays')->truncate();
+        DB::table('users')->truncate();
+        DB::table('divisions')->truncate();
         Schema::enableForeignKeyConstraints();
 
-        // Users, divisions, holidays use firstOrCreate / updateOrCreate — safe to re-run
+        // All seeded from scratch each run
         $this->call([
             DivisionSeeder::class,
             HolidaySeeder::class,

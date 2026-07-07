@@ -16,23 +16,30 @@ class DashboardController extends Controller
         $user  = Auth::user();
         $today = Carbon::today('Asia/Jakarta');
 
+        // Karyawan tidak punya dashboard — langsung ke kalender
         if ($user->isKaryawan()) {
             return redirect()->route('karyawan.kalender');
         }
 
-        // Manager / Admin: dashboard monitoring
-        $divisionId = $user->isAdmin() ? null : $user->division_id;
+        // Tentukan scope bawahan berdasarkan reports_to
+        // Admin: semua karyawan aktif (behaviour lama)
+        // Direksi/Manager/Leader: direct reports saja
+        if ($user->isAdmin()) {
+            $usersQuery = User::where('role', 'karyawan')
+                ->where('is_active', true)
+                ->with('division');
+        } else {
+            $usersQuery = User::where('reports_to', $user->id)
+                ->where('is_active', true)
+                ->with('division');
+        }
 
-        $usersQuery = User::where('role', 'karyawan')
-            ->where('is_active', true)
-            ->when($divisionId, fn($q) => $q->where('division_id', $divisionId))
-            ->with('division');
-
-        $totalKaryawan = $usersQuery->count();
+        $totalBawahan = $usersQuery->count();
 
         $sudahIsiBulan = DailyPlan::whereIn('user_id', $usersQuery->pluck('id'))
             ->where('plan_date', '>=', $today->copy()->startOfMonth())
             ->where('plan_date', '<=', $today->copy()->endOfMonth())
+            ->whereNotNull('plan_submitted_at')
             ->count();
 
         $hariKerjaBulan = $this->countWorkdays($today->copy()->startOfMonth(), $today);
@@ -42,15 +49,16 @@ class DashboardController extends Controller
             ->whereNotNull('plan_submitted_at')
             ->count();
 
-        $belumIsiHariIni = $totalKaryawan - $sudahIsiHariIni;
+        $belumIsiHariIni = $totalBawahan - $sudahIsiHariIni;
 
-        // Per divisi (admin only)
+        // Rekap per divisi — hanya untuk admin & direksi (lintas divisi)
         $perDivisi = collect();
-        if ($user->isAdmin()) {
-            $perDivisi = User::where('role', 'karyawan')
-                ->where('is_active', true)
-                ->with('division')
-                ->get()
+        if ($user->isAdmin() || $user->isDireksi()) {
+            $scope = $user->isAdmin()
+                ? User::where('role', 'karyawan')->where('is_active', true)->with('division')->get()
+                : User::where('reports_to', $user->id)->where('is_active', true)->with('division')->get();
+
+            $perDivisi = $scope
                 ->groupBy('division_id')
                 ->map(function ($members) use ($today) {
                     $ids = $members->pluck('id');
@@ -63,8 +71,10 @@ class DashboardController extends Controller
                 })->values();
         }
 
-        // Tren kepatuhan 4 minggu terakhir (% plan tersubmit per hari kerja)
+        // Tren kepatuhan 4 minggu terakhir
         $trendData = $this->getComplianceTrend($usersQuery->pluck('id')->toArray());
+
+        $totalKaryawan = $totalBawahan;
 
         return view('dashboard', compact(
             'totalKaryawan', 'sudahIsiHariIni', 'belumIsiHariIni',
@@ -99,10 +109,7 @@ class DashboardController extends Controller
             if (!$current->isWeekend() && !Holiday::isHoliday($current->toDateString())) {
                 $dateStr = $current->toDateString();
                 $total = count($userIds);
-                if ($total === 0) {
-                    $current->addDay();
-                    continue;
-                }
+                if ($total === 0) { $current->addDay(); continue; }
 
                 $planCount   = DailyPlan::whereIn('user_id', $userIds)->whereDate('plan_date', $dateStr)->whereNotNull('plan_submitted_at')->count();
                 $reportCount = DailyPlan::whereIn('user_id', $userIds)->whereDate('plan_date', $dateStr)->whereNotNull('report_submitted_at')->count();
