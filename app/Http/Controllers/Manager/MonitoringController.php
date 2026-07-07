@@ -22,8 +22,8 @@ class MonitoringController extends Controller
         $date   = $request->get('date', $now->toDateString());
         $parsed = Carbon::parse($date, 'Asia/Jakarta');
 
-        // Admin: semua karyawan; lainnya: direct reports saja
-        $subordinatesQuery = $user->isAdmin()
+        // Admin/Direksi: semua karyawan; lainnya: direct reports saja
+        $subordinatesQuery = ($user->isAdmin() || $user->isDireksi())
             ? User::where('role', 'karyawan')->where('is_active', true)
             : User::where('reports_to', $user->id)->where('is_active', true);
 
@@ -53,8 +53,8 @@ class MonitoringController extends Controller
     {
         $supervisor = Auth::user();
 
-        // Otorisasi: user harus langsung reports_to supervisor, atau supervisor adalah admin
-        if (!$supervisor->isAdmin() && (int) $user->reports_to !== $supervisor->id) {
+        // Otorisasi: admin/direksi bisa lihat siapapun; lainnya hanya direct reports
+        if (!$supervisor->isAdmin() && !$supervisor->isDireksi() && (int) $user->reports_to !== $supervisor->id) {
             abort(403);
         }
 
@@ -73,8 +73,8 @@ class MonitoringController extends Controller
     {
         $supervisor = Auth::user();
 
-        // Otorisasi: hanya atasan langsung atau admin yang boleh beri feedback
-        if (!$supervisor->isAdmin() && (int) $dailyPlan->user->reports_to !== $supervisor->id) {
+        // Otorisasi: admin/direksi bisa beri feedback ke siapapun; lainnya hanya direct reports
+        if (!$supervisor->isAdmin() && !$supervisor->isDireksi() && (int) $dailyPlan->user->reports_to !== $supervisor->id) {
             abort(403);
         }
 

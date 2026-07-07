@@ -159,7 +159,7 @@ class ReportController extends Controller
 
     private function getSubordinates(User $manager): \Illuminate\Database\Eloquent\Builder
     {
-        if ($manager->isAdmin()) {
+        if ($manager->isAdmin() || $manager->isDireksi()) {
             return User::where('role', 'karyawan')->where('is_active', true);
         }
         return User::where('reports_to', $manager->id)->where('is_active', true);
