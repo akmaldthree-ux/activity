@@ -47,7 +47,13 @@
     </li>
     @if(Auth::user()->isManager() || Auth::user()->isAdmin())
     <li class="n-nav-item">
-        @php $pendingCount = \App\Models\User::where('status','pending')->when(Auth::user()->isManager(), fn($q) => $q->where('division_id', Auth::user()->division_id))->count(); @endphp
+        @php
+            if (Auth::user()->isAdmin()) {
+                $pendingCount = \App\Models\User::whereIn('status', ['pending', 'manager_approved'])->count();
+            } else {
+                $pendingCount = \App\Models\User::where('status', 'pending')->where('division_id', Auth::user()->division_id)->count();
+            }
+        @endphp
         <a href="{{ route('approval.index') }}" class="{{ request()->routeIs('approval*') ? 'active' : '' }}">
             <i class="bi bi-person-check"></i> Persetujuan
             @if($pendingCount > 0)

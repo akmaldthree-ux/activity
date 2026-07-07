@@ -18,11 +18,11 @@ class ApprovalController extends Controller
         $divisionId = $manager->isAdmin() ? null : $manager->division_id;
 
         if ($manager->isAdmin()) {
-            // Admin sees manager_approved accounts (waiting for final approval)
-            $pending = User::where('status', 'manager_approved')
+            // Admin melihat semua akun yang butuh persetujuan (pending atau manager_approved)
+            $pending = User::whereIn('status', ['pending', 'manager_approved'])
                 ->with('division')->latest()->get();
         } else {
-            // Manager sees pending accounts in their division
+            // Manager melihat akun pending di divisinya
             $pending = User::where('status', 'pending')
                 ->when($divisionId, fn($q) => $q->where('division_id', $divisionId))
                 ->with('division')->latest()->get();

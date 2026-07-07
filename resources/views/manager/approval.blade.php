@@ -24,6 +24,7 @@
                         <th class="d-none d-md-table-cell">Jabatan</th>
                         <th class="d-none d-md-table-cell">No. HP</th>
                         <th>Divisi</th>
+                        @auth @if(Auth::user()->isAdmin()) <th>Tahap</th> @endif @endauth
                         <th>Daftar</th>
                         <th>Aksi</th>
                     </tr>
@@ -36,6 +37,17 @@
                         <td class="d-none d-md-table-cell small">{{ $user->jabatan ?? '—' }}</td>
                         <td class="d-none d-md-table-cell small">{{ $user->no_hp ?? '—' }}</td>
                         <td><span class="badge bg-light text-dark border">{{ $user->division?->name ?? '—' }}</span></td>
+                        @auth
+                        @if(Auth::user()->isAdmin())
+                        <td>
+                            @if($user->status === 'pending')
+                                <span class="badge bg-warning text-dark">Menunggu Manager</span>
+                            @else
+                                <span class="badge bg-info text-dark">Siap Disetujui</span>
+                            @endif
+                        </td>
+                        @endif
+                        @endauth
                         <td class="small text-muted">{{ $user->created_at->diffForHumans() }}</td>
                         <td>
                             <div class="d-flex gap-1 flex-wrap">
