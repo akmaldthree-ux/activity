@@ -15,7 +15,7 @@
         <h5 class="fw-bold mb-1">{{ $announcement->title }}</h5>
         <div class="d-flex gap-3 text-muted small mb-3">
             <span><i class="bi bi-person me-1"></i>{{ $announcement->author->name }}</span>
-            <span><i class="bi bi-calendar me-1"></i>{{ $announcement->published_at->translatedFormat('d F Y, H:i') }}</span>
+            <span><i class="bi bi-calendar me-1"></i>{{ $announcement->published_at?->translatedFormat('d F Y, H:i') ?? '—' }}</span>
             @if($announcement->division)
                 <span><i class="bi bi-people me-1"></i>{{ $announcement->division->name }}</span>
             @endif

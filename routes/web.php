@@ -36,7 +36,7 @@ Route::middleware('auth')->group(function () {
     // Kalender & plan harian — semua yang wajib isi plan (karyawan, leader, manager)
     Route::prefix('kalender')->name('karyawan.')->middleware('role:karyawan,leader,manager,admin')->group(function () {
         Route::get('/', [DailyPlanController::class, 'index'])->name('kalender');
-        Route::get('/{date}', [DailyPlanController::class, 'show'])->name('daily');
+        Route::get('/{date}', [DailyPlanController::class, 'show'])->name('daily')->where('date', '\d{4}-\d{2}-\d{2}');
         Route::post('/{date}/plan', [DailyPlanController::class, 'storePlan'])->name('plan.store');
         Route::post('/{date}/report', [DailyPlanController::class, 'storeReport'])->name('report.store');
     });
@@ -60,7 +60,7 @@ Route::middleware('auth')->group(function () {
     // Monitoring tim
     Route::prefix('monitoring')->name('monitoring.')->middleware('role:leader,manager,direksi,admin')->group(function () {
         Route::get('/tim', [MonitoringController::class, 'tim'])->name('tim');
-        Route::get('/tim/{user}/{date}', [MonitoringController::class, 'detail'])->name('detail');
+        Route::get('/tim/{user}/{date}', [MonitoringController::class, 'detail'])->name('detail')->where('date', '\d{4}-\d{2}-\d{2}');
         Route::post('/feedback/{dailyPlan}', [MonitoringController::class, 'saveFeedback'])->name('feedback');
     });
 

@@ -75,7 +75,7 @@
         @if($feedback)
         <div class="mb-3 p-3 bg-light rounded">
             <div class="d-flex align-items-center gap-2 mb-1">
-                <span class="fw-semibold small">{{ $feedback->manager->name }}</span>
+                <span class="fw-semibold small">{{ $feedback->manager?->name ?? '—' }}</span>
                 @if($feedback->rating)
                 <span class="text-warning">
                     @for($i=1;$i<=5;$i++)

@@ -436,11 +436,11 @@
         {{-- Feedback utama --}}
         <div class="d-flex align-items-start gap-3 mb-3">
             <div class="n-initials bg-primary" style="width:36px;height:36px;font-size:13px">
-                {{ strtoupper(substr($plan->feedback->manager->name, 0, 1)) }}
+                {{ strtoupper(substr($plan->feedback->manager?->name ?? '?', 0, 1)) }}
             </div>
             <div class="flex-grow-1">
                 <div class="d-flex align-items-center gap-2 mb-1">
-                    <span class="fw-semibold small">{{ $plan->feedback->manager->name }}</span>
+                    <span class="fw-semibold small">{{ $plan->feedback->manager?->name ?? '—' }}</span>
                     @if($plan->feedback->rating)
                         <span class="text-warning small">
                             @for($i=1;$i<=5;$i++)
