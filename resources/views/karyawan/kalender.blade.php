@@ -30,7 +30,7 @@
         {{-- Header hari --}}
         <div class="row g-1 mb-1 text-center">
             @foreach(['Sen','Sel','Rab','Kam','Jum','Sab','Min'] as $i => $h)
-                <div class="col {{ $i >= 5 ? 'text-muted' : 'fw-semibold' }}" style="font-size:.8rem">{{ $h }}</div>
+                <div class="col {{ $i >= 6 ? 'text-muted' : 'fw-semibold' }}" style="font-size:.8rem">{{ $h }}</div>
             @endforeach
         </div>
 
@@ -50,7 +50,7 @@
                         $cellIndex = $row * 7 + $col;
                         $dayNum = $cellIndex - $startPad + 1;
                         $isCurrentMonth = $dayNum >= 1 && $dayNum <= $daysInMonth;
-                        $isWeekend = $col >= 5; // Sab & Min
+                        $isWeekend = $col >= 6; // Min saja (Sabtu masuk)
                         $dateStr = $isCurrentMonth ? \Carbon\Carbon::create($year, $month, $dayNum)->format('Y-m-d') : null;
                         $isHoliday = $dateStr && isset($holidays[$dateStr]);
                         $holidayName = $isHoliday ? $holidays[$dateStr] : null;
@@ -94,7 +94,7 @@
 </div>
 
 {{-- Shortcut hari ini --}}
-@if($now->month === $month && $now->year === $year && !$now->isWeekend())
+@if($now->month === $month && $now->year === $year && !$now->isSunday())
 <div class="mt-3">
     <a href="{{ route('karyawan.daily', $now->format('Y-m-d')) }}" class="btn btn-primary">
         <i class="bi bi-pencil-square me-1"></i>Isi Catatan Hari Ini

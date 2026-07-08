@@ -22,7 +22,7 @@ class SendPlanReminder extends Command
         $today = Carbon::today('Asia/Jakarta');
 
         // Skip weekend & holiday
-        if ($today->isWeekend() || Holiday::isHoliday($today->toDateString())) {
+        if ($today->isSunday() || Holiday::isHoliday($today->toDateString())) {
             $this->info('Hari libur, tidak ada reminder.');
             return;
         }

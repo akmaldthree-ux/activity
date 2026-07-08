@@ -110,13 +110,13 @@ class ReportController extends Controller
         $weekNum  = (int) ($parts[1] ?? now()->isoWeek());
 
         $weekStart = Carbon::now()->setISODate($weekYear, $weekNum)->startOfDay()->timezone('Asia/Jakarta');
-        $weekEnd   = $weekStart->copy()->endOfWeek(Carbon::FRIDAY); // Mon-Fri
+        $weekEnd   = $weekStart->copy()->endOfWeek(Carbon::SATURDAY); // Mon-Sat
 
         // All weekdays in range
         $weekDays = [];
         $current = $weekStart->copy();
         while ($current->lte($weekEnd)) {
-            if (!$current->isWeekend()) {
+            if (!$current->isSunday()) {
                 $weekDays[] = $current->copy();
             }
             $current->addDay();
@@ -170,7 +170,7 @@ class ReportController extends Controller
         $count   = 0;
         $current = $start->copy();
         while ($current->lte($end)) {
-            if (!$current->isWeekend() && !Holiday::isHoliday($current->toDateString())) {
+            if (!$current->isSunday() && !Holiday::isHoliday($current->toDateString())) {
                 $count++;
             }
             $current->addDay();

@@ -19,7 +19,7 @@ class SendReportReminder extends Command
     {
         $today = Carbon::today('Asia/Jakarta');
 
-        if ($today->isWeekend()) {
+        if ($today->isSunday()) {
             $this->info('Hari libur, tidak ada reminder.');
             return;
         }

@@ -84,7 +84,7 @@ class DashboardController extends Controller
         $count = 0;
         $current = $start->copy();
         while ($current->lte($end)) {
-            if (!$current->isWeekend() && !Holiday::isHoliday($current->toDateString())) {
+            if (!$current->isSunday() && !Holiday::isHoliday($current->toDateString())) {
                 $count++;
             }
             $current->addDay();
@@ -102,7 +102,7 @@ class DashboardController extends Controller
 
         $current = $start->copy();
         while ($current->lte($end)) {
-            if (!$current->isWeekend() && !Holiday::isHoliday($current->toDateString())) {
+            if (!$current->isSunday() && !Holiday::isHoliday($current->toDateString())) {
                 $dateStr = $current->toDateString();
                 $total = count($userIds);
                 if ($total === 0) { $current->addDay(); continue; }

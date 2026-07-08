@@ -52,7 +52,7 @@ class DailyPlanController extends Controller
         $parsedDate = Carbon::createFromFormat('Y-m-d', $date, 'Asia/Jakarta');
 
         // Skip weekend & holiday
-        if ($parsedDate->isWeekend() || Holiday::isHoliday($date)) {
+        if ($parsedDate->isSunday() || Holiday::isHoliday($date)) {
             return redirect()->route('karyawan.kalender')->with('error', 'Hari libur tidak ada catatan.');
         }
 
@@ -76,7 +76,7 @@ class DailyPlanController extends Controller
         $carryOverActivities = collect();
         if ($isToday && !$plan->plan_submitted_at) {
             $prevWorkDay = $parsedDate->copy()->subDay();
-            while ($prevWorkDay->isWeekend() || Holiday::isHoliday($prevWorkDay->toDateString())) {
+            while ($prevWorkDay->isSunday() || Holiday::isHoliday($prevWorkDay->toDateString())) {
                 $prevWorkDay->subDay();
             }
             $prevPlan = DailyPlan::where('user_id', $user->id)
@@ -102,7 +102,7 @@ class DailyPlanController extends Controller
         $user = Auth::user();
         $parsedDate = Carbon::createFromFormat('Y-m-d', $date, 'Asia/Jakarta');
 
-        if (!$parsedDate->isToday() || $parsedDate->isWeekend() || Holiday::isHoliday($date)) {
+        if (!$parsedDate->isToday() || $parsedDate->isSunday() || Holiday::isHoliday($date)) {
             return back()->with('error', 'Plan hanya bisa disimpan untuk hari kerja hari ini.');
         }
 
