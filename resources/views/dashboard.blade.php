@@ -34,7 +34,7 @@
         <div class="card border-0 shadow-sm text-center">
             <div class="card-body py-3">
                 <div class="fs-2 fw-bold text-info">
-                    {{ $hariKerjaBulan > 0 ? round($sudahIsiBulan / ($totalKaryawan * $hariKerjaBulan) * 100) : 0 }}%
+                    {{ ($hariKerjaBulan > 0 && $totalKaryawan > 0) ? round($sudahIsiBulan / ($totalKaryawan * $hariKerjaBulan) * 100) : 0 }}%
                 </div>
                 <div class="small text-muted">Kepatuhan Bulan Ini</div>
             </div>
