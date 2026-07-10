@@ -78,12 +78,18 @@
                             <div class="cal-day weekend border p-1 p-md-2" title="{{ $holidayName ?? 'Weekend' }}">
                                 <span class="day-num">{{ $dayNum }}</span>
                                 <div style="font-size:.6rem;color:#ccc;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
-                                    {{ $holidayName ? Str::limit($holidayName, 10) : 'Libur' }}
+                                    {{ $holidayName ? Str::limit($holidayName, 16) : 'Libur' }}
                                 </div>
                             </div>
                         @else
+                            @php
+                                // Hari dari bulan sebelum/sesudah
+                                $adjDay = $dayNum <= 0
+                                    ? $firstDay->copy()->subMonth()->daysInMonth + $dayNum
+                                    : $dayNum - $daysInMonth;
+                            @endphp
                             <div class="cal-day border p-1 p-md-2 other-month">
-                                <span class="day-num text-muted">{{ $dayNum > 0 ? $dayNum : '' }}</span>
+                                <span class="day-num text-muted" style="opacity:.3">{{ $adjDay }}</span>
                             </div>
                         @endif
                     </div>
