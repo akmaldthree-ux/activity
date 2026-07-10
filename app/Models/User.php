@@ -24,6 +24,9 @@ class User extends Authenticatable
     public const ROLE_DIREKSI  = 'direksi';
     public const ROLE_ADMIN    = 'admin';
 
+    // Role yang wajib mengisi daily plan dan dapat dimonitor
+    public const MONITORED_ROLES = ['karyawan', 'leader', 'manager'];
+
     public const STATUS_PENDING           = 'pending';
     public const STATUS_MANAGER_APPROVED  = 'manager_approved';
     public const STATUS_ACTIVE            = 'active';

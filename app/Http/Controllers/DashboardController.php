@@ -23,7 +23,7 @@ class DashboardController extends Controller
 
         // Admin/Direksi: semua karyawan; lainnya: direct reports saja
         if ($user->isAdmin() || $user->isDireksi()) {
-            $usersQuery = User::where('role', 'karyawan')
+            $usersQuery = User::whereIn('role', User::MONITORED_ROLES)
                 ->where('is_active', true)
                 ->with('division');
         } else {
@@ -52,7 +52,7 @@ class DashboardController extends Controller
         // Rekap per divisi — hanya untuk admin & direksi (lintas divisi)
         $perDivisi = collect();
         if ($user->isAdmin() || $user->isDireksi()) {
-            $scope = User::where('role', 'karyawan')->where('is_active', true)->with('division')->get();
+            $scope = User::whereIn('role', User::MONITORED_ROLES)->where('is_active', true)->with('division')->get();
 
             $perDivisi = $scope
                 ->groupBy('division_id')

@@ -68,12 +68,12 @@ class ReportController extends Controller
         $end   = $start->copy()->endOfMonth();
         $workdays = $this->countWorkdays($start, $end);
 
-        $divisions = Division::withCount(['users as karyawan_count' => fn($q) => $q->where('role', 'karyawan')->where('is_active', true)])
+        $divisions = Division::withCount(['users as karyawan_count' => fn($q) => $q->whereIn('role', User::MONITORED_ROLES)->where('is_active', true)])
             ->when($divisionId, fn($q) => $q->where('id', $divisionId))
             ->having('karyawan_count', '>', 0)
             ->get()
             ->map(function ($div) use ($start, $end, $workdays) {
-                $ids = User::where('division_id', $div->id)->where('role', 'karyawan')->where('is_active', true)->pluck('id');
+                $ids = User::where('division_id', $div->id)->whereIn('role', User::MONITORED_ROLES)->where('is_active', true)->pluck('id');
                 $total = $ids->count();
 
                 $plans   = DailyPlan::whereIn('user_id', $ids)->whereBetween('plan_date', [$start->toDateString(), $end->toDateString()]);
@@ -160,7 +160,7 @@ class ReportController extends Controller
     private function getSubordinates(User $manager): \Illuminate\Database\Eloquent\Builder
     {
         if ($manager->isAdmin() || $manager->isDireksi()) {
-            return User::where('role', 'karyawan')->where('is_active', true);
+            return User::whereIn('role', User::MONITORED_ROLES)->where('is_active', true);
         }
         return User::where('reports_to', $manager->id)->where('is_active', true);
     }

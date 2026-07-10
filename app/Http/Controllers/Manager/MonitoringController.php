@@ -24,7 +24,7 @@ class MonitoringController extends Controller
 
         // Admin/Direksi: semua karyawan; lainnya: direct reports saja
         $subordinatesQuery = ($user->isAdmin() || $user->isDireksi())
-            ? User::where('role', 'karyawan')->where('is_active', true)
+            ? User::whereIn('role', User::MONITORED_ROLES)->where('is_active', true)
             : User::where('reports_to', $user->id)->where('is_active', true);
 
         $subordinates = $subordinatesQuery->with('division')->orderBy('name')->get();

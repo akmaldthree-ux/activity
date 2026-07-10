@@ -30,7 +30,6 @@ class ApprovalController extends Controller
 
         $recent = User::whereIn('status', ['active', 'rejected'])
             ->when(!$manager->isAdmin() && $divisionId, fn($q) => $q->where('division_id', $divisionId))
-            ->where('role', 'karyawan')
             ->with('division')
             ->latest()
             ->limit(20)
