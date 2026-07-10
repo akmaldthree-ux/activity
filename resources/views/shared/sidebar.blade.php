@@ -64,9 +64,21 @@
     @endif
     @endif
 
-    @if(Auth::user()->isAdmin())
+    @if(Auth::user()->isManager() || Auth::user()->isDireksi() || Auth::user()->isAdmin())
     <div class="n-nav-divider" style="margin-top:10px"></div>
+    @if(Auth::user()->isAdmin())
     <div class="n-nav-section">Admin</div>
+    @else
+    <div class="n-nav-section">Kelola</div>
+    @endif
+    <li class="n-nav-item">
+        <a href="{{ route('admin.announcements.index') }}" class="{{ request()->routeIs('admin.announcements*') ? 'active' : '' }}">
+            <i class="bi bi-megaphone-fill"></i> Kelola Pengumuman
+        </a>
+    </li>
+    @endif
+
+    @if(Auth::user()->isAdmin())
     <li class="n-nav-item">
         <a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users.index') || request()->routeIs('admin.users.create') || request()->routeIs('admin.users.edit') ? 'active' : '' }}">
             <i class="bi bi-person-gear"></i> Kelola User
@@ -85,11 +97,6 @@
     <li class="n-nav-item">
         <a href="{{ route('admin.holidays.index') }}" class="{{ request()->routeIs('admin.holidays*') ? 'active' : '' }}">
             <i class="bi bi-calendar-x"></i> Hari Libur
-        </a>
-    </li>
-    <li class="n-nav-item">
-        <a href="{{ route('admin.announcements.index') }}" class="{{ request()->routeIs('admin.announcements*') ? 'active' : '' }}">
-            <i class="bi bi-megaphone-fill"></i> Kelola Pengumuman
         </a>
     </li>
     @endif

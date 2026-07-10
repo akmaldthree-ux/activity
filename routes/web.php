@@ -87,7 +87,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/pengumuman', [AnnouncementViewController::class, 'index'])->name('announcements.index');
     Route::get('/pengumuman/{announcement}', [AnnouncementViewController::class, 'show'])->name('announcements.show');
 
-    // Admin
+    // Pengumuman — bisa dibuat oleh manager ke atas
+    Route::prefix('admin')->name('admin.')->middleware('role:manager,direksi,admin')->group(function () {
+        Route::resource('announcements', AnnouncementController::class);
+    });
+
+    // Admin only
     Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
         Route::get('users/hierarki', [UserController::class, 'hierarki'])->name('users.hierarki');
         Route::post('users/hierarki', [UserController::class, 'updateHierarki'])->name('users.hierarki.update');
@@ -98,6 +103,5 @@ Route::middleware('auth')->group(function () {
         Route::post('holidays', [HolidayController::class, 'store'])->name('holidays.store');
         Route::post('holidays/sync', [HolidayController::class, 'sync'])->name('holidays.sync');
         Route::delete('holidays/{holiday}', [HolidayController::class, 'destroy'])->name('holidays.destroy');
-        Route::resource('announcements', AnnouncementController::class);
     });
 });

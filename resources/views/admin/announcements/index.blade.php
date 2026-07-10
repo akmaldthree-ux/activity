@@ -30,6 +30,7 @@
                 </thead>
                 <tbody>
                     @foreach($announcements as $a)
+                    @php $canEdit = auth()->user()->isAdmin() || $a->user_id === auth()->id(); @endphp
                     <tr>
                         <td>
                             <span class="fw-semibold">{{ $a->title }}</span>
@@ -45,8 +46,9 @@
                                 <span class="text-muted">Draft</span>
                             @endif
                         </td>
-                        <td>{{ $a->author->name }}</td>
+                        <td class="small text-muted">{{ $a->author->name }}</td>
                         <td class="text-end">
+                            @if($canEdit)
                             <a href="{{ route('admin.announcements.edit', $a) }}" class="btn btn-sm btn-outline-primary me-1">
                                 <i class="bi bi-pencil"></i>
                             </a>
@@ -55,6 +57,9 @@
                                 @csrf @method('DELETE')
                                 <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
                             </form>
+                            @else
+                            <span class="text-muted small">—</span>
+                            @endif
                         </td>
                     </tr>
                     @endforeach

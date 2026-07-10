@@ -34,14 +34,20 @@
             <div class="row g-3 mb-3">
                 <div class="col-md-6">
                     <label class="form-label fw-semibold">Sasaran Divisi</label>
-                    <select name="division_id" class="form-select">
-                        <option value="">Semua Divisi</option>
-                        @foreach($divisions as $div)
-                        <option value="{{ $div->id }}" @selected(old('division_id', $announcement->division_id ?? '') == $div->id)>
-                            {{ $div->name }}
-                        </option>
-                        @endforeach
-                    </select>
+                    @if($user->isManager())
+                        {{-- Manager hanya bisa kirim ke divisinya sendiri --}}
+                        <input type="text" class="form-control" value="{{ $user->division?->name ?? '—' }}" disabled>
+                        <div class="form-text">Pengumuman otomatis ditargetkan ke divisi Anda.</div>
+                    @else
+                        <select name="division_id" class="form-select">
+                            <option value="">Semua Divisi</option>
+                            @foreach($divisions as $div)
+                            <option value="{{ $div->id }}" @selected(old('division_id', $announcement->division_id ?? '') == $div->id)>
+                                {{ $div->name }}
+                            </option>
+                            @endforeach
+                        </select>
+                    @endif
                 </div>
                 <div class="col-md-6">
                     <label class="form-label fw-semibold">Tanggal Publikasi</label>
