@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
@@ -110,5 +111,46 @@ class UserController extends Controller
     {
         $user->update(['is_active' => !$user->is_active]);
         return back()->with('success', $user->is_active ? 'User diaktifkan.' : 'User dinonaktifkan.');
+    }
+
+    public function hierarki(Request $request)
+    {
+        $divisionId = $request->get('division_id');
+
+        $users = User::whereIn('role', User::MONITORED_ROLES)
+            ->where('is_active', true)
+            ->when($divisionId, fn($q) => $q->where('division_id', $divisionId))
+            ->with(['division', 'supervisor'])
+            ->orderBy('name')
+            ->get();
+
+        $supervisors = User::whereIn('role', ['leader', 'manager', 'direksi', 'admin'])
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        $divisions = Division::orderBy('name')->get();
+
+        return view('admin.users.hierarki', compact('users', 'supervisors', 'divisions', 'divisionId'));
+    }
+
+    public function updateHierarki(Request $request)
+    {
+        $request->validate([
+            'reports_to'   => ['required', 'array'],
+            'reports_to.*' => ['nullable', 'exists:users,id'],
+        ]);
+
+        $count = 0;
+        DB::transaction(function () use ($request, &$count) {
+            foreach ($request->input('reports_to', []) as $userId => $supervisorId) {
+                $updated = User::where('id', (int) $userId)
+                    ->whereIn('role', User::MONITORED_ROLES)
+                    ->update(['reports_to' => $supervisorId ?: null]);
+                $count += $updated;
+            }
+        });
+
+        return back()->with('success', "Hierarki {$count} user berhasil diperbarui.");
     }
 }

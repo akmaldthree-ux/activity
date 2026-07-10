@@ -90,6 +90,8 @@ Route::middleware('auth')->group(function () {
     // Admin
     Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
         Route::delete('users/bulk-destroy', [UserController::class, 'bulkDestroy'])->name('users.bulkDestroy');
+        Route::get('users/hierarki', [UserController::class, 'hierarki'])->name('users.hierarki');
+        Route::post('users/hierarki', [UserController::class, 'updateHierarki'])->name('users.hierarki.update');
         Route::resource('users', UserController::class);
         Route::resource('divisions', DivisionController::class);
         Route::patch('users/{user}/toggle', [UserController::class, 'toggleActive'])->name('users.toggle');

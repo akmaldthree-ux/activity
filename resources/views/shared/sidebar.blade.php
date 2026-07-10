@@ -68,8 +68,13 @@
     <div class="n-nav-divider" style="margin-top:10px"></div>
     <div class="n-nav-section">Admin</div>
     <li class="n-nav-item">
-        <a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users*') ? 'active' : '' }}">
+        <a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users.index') || request()->routeIs('admin.users.create') || request()->routeIs('admin.users.edit') ? 'active' : '' }}">
             <i class="bi bi-person-gear"></i> Kelola User
+        </a>
+    </li>
+    <li class="n-nav-item">
+        <a href="{{ route('admin.users.hierarki') }}" class="{{ request()->routeIs('admin.users.hierarki') ? 'active' : '' }}">
+            <i class="bi bi-diagram-2"></i> Atur Hierarki
         </a>
     </li>
     <li class="n-nav-item">
