@@ -99,6 +99,17 @@ class UserController extends Controller
         return back()->with('success', $user->is_active ? 'User diaktifkan.' : 'User dinonaktifkan.');
     }
 
+    public function resetPassword(User $user)
+    {
+        $newPassword = substr(str_shuffle('abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789'), 0, 8);
+        $user->update(['password' => Hash::make($newPassword)]);
+
+        return back()->with('reset_password', [
+            'name'     => $user->name,
+            'password' => $newPassword,
+        ]);
+    }
+
     public function hierarki(Request $request)
     {
         $divisionId = $request->get('division_id');

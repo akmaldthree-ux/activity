@@ -99,6 +99,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('users', UserController::class);
         Route::resource('divisions', DivisionController::class);
         Route::patch('users/{user}/toggle', [UserController::class, 'toggleActive'])->name('users.toggle');
+        Route::post('users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.resetPassword');
         Route::get('holidays', [HolidayController::class, 'index'])->name('holidays.index');
         Route::post('holidays', [HolidayController::class, 'store'])->name('holidays.store');
         Route::post('holidays/sync', [HolidayController::class, 'sync'])->name('holidays.sync');

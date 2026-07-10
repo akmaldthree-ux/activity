@@ -3,6 +3,30 @@
 @section('title', 'Kelola User')
 
 @section('content')
+
+{{-- Alert reset password --}}
+@if(session('reset_password'))
+@php $rp = session('reset_password'); @endphp
+<div class="alert alert-warning alert-dismissible mb-4" role="alert" id="resetAlert">
+    <div class="d-flex align-items-start gap-2">
+        <i class="bi bi-key-fill fs-5 mt-1 flex-shrink-0"></i>
+        <div>
+            <div class="fw-semibold mb-1">Password {{ $rp['name'] }} berhasil direset</div>
+            <div class="mb-2">Berikan password sementara ini kepada karyawan:</div>
+            <div class="d-flex align-items-center gap-2">
+                <code id="newPwDisplay" class="fs-5 px-3 py-1 rounded"
+                      style="background:rgba(0,0,0,.08);letter-spacing:.15em;user-select:all">{{ $rp['password'] }}</code>
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="copyPw()">
+                    <i class="bi bi-clipboard" id="copyIcon"></i>
+                </button>
+            </div>
+            <div class="form-text mt-2">Minta karyawan segera ganti password setelah login.</div>
+        </div>
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+@endif
+
 <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
     <h5 class="fw-bold mb-0"><i class="bi bi-person-gear me-1 text-primary"></i>Kelola User</h5>
     <a href="{{ route('admin.users.create') }}" class="btn btn-primary btn-sm">
@@ -102,6 +126,13 @@
                                         <i class="bi bi-{{ $user->is_active ? 'pause' : 'play' }}"></i>
                                     </button>
                                 </form>
+                                <form action="{{ route('admin.users.resetPassword', $user) }}" method="POST" class="d-inline"
+                                      onsubmit="return confirm('Reset password {{ addslashes($user->name) }}? Password lama tidak bisa dikembalikan.')">
+                                    @csrf
+                                    <button class="btn btn-xs btn-outline-secondary py-0 px-2" title="Reset Password">
+                                        <i class="bi bi-key"></i>
+                                    </button>
+                                </form>
                                 <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="d-inline"
                                       onsubmit="return confirm('Hapus user {{ addslashes($user->name) }}?')">
                                     @csrf @method('DELETE')
@@ -119,4 +150,17 @@
     </div>
 </div>
 <div class="mt-3">{{ $users->links() }}</div>
+
+@push('scripts')
+<script>
+function copyPw() {
+    const text = document.getElementById('newPwDisplay').textContent.trim();
+    navigator.clipboard.writeText(text).then(() => {
+        const icon = document.getElementById('copyIcon');
+        icon.className = 'bi bi-check2';
+        setTimeout(() => icon.className = 'bi bi-clipboard', 2000);
+    });
+}
+</script>
+@endpush
 @endsection
