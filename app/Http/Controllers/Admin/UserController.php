@@ -92,6 +92,20 @@ class UserController extends Controller
         return back()->with('success', 'User dihapus.');
     }
 
+    public function bulkDestroy(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        if (empty($ids)) {
+            return back()->with('error', 'Tidak ada user yang dipilih.');
+        }
+
+        // Jangan izinkan hapus diri sendiri
+        $ids = array_filter($ids, fn($id) => (int)$id !== auth()->id());
+
+        $count = User::whereIn('id', $ids)->delete();
+        return back()->with('success', "{$count} user berhasil dihapus.");
+    }
+
     public function toggleActive(User $user)
     {
         $user->update(['is_active' => !$user->is_active]);
