@@ -11,7 +11,14 @@
 </div>
 
 {{-- Filter --}}
-<form class="row g-2 mb-3" method="GET">
+<form class="row g-2 mb-3 align-items-center" method="GET">
+    <div class="col-12 col-md-auto flex-grow-1" style="max-width:280px">
+        <div class="input-group input-group-sm">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input type="text" name="search" class="form-control form-control-sm"
+                   placeholder="Cari nama / email…" value="{{ request('search') }}">
+        </div>
+    </div>
     <div class="col-auto">
         <select name="role" class="form-select form-select-sm">
             <option value="">Semua Role</option>
@@ -31,8 +38,16 @@
         </select>
     </div>
     <div class="col-auto">
-        <button class="btn btn-sm btn-outline-secondary">Filter</button>
-        <a href="{{ route('admin.users.index') }}" class="btn btn-sm btn-link">Reset</a>
+        <select name="sort" class="form-select form-select-sm">
+            <option value="name_asc"  {{ request('sort','name_asc')=='name_asc'  ?'selected':'' }}>Nama A–Z</option>
+            <option value="name_desc" {{ request('sort')=='name_desc'?'selected':'' }}>Nama Z–A</option>
+            <option value="newest"    {{ request('sort')=='newest'   ?'selected':'' }}>Terbaru Daftar</option>
+            <option value="oldest"    {{ request('sort')=='oldest'   ?'selected':'' }}>Terlama Daftar</option>
+        </select>
+    </div>
+    <div class="col-auto">
+        <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-funnel me-1"></i>Filter</button>
+        <a href="{{ route('admin.users.index') }}" class="btn btn-sm btn-link text-muted">Reset</a>
     </div>
 </form>
 
@@ -46,6 +61,7 @@
                         <th class="d-none d-md-table-cell">Email</th>
                         <th>Role</th>
                         <th class="d-none d-md-table-cell">Divisi</th>
+                        <th class="d-none d-lg-table-cell text-center">Tgl Daftar</th>
                         <th class="text-center">Status</th>
                         <th>Aksi</th>
                     </tr>
@@ -68,6 +84,7 @@
                             <span class="badge {{ $badgeClass }}">{{ $user->roleLabel() }}</span>
                         </td>
                         <td class="d-none d-md-table-cell small">{{ $user->division?->name ?? '—' }}</td>
+                        <td class="d-none d-lg-table-cell text-center small text-muted">{{ $user->created_at->format('d/m/Y') }}</td>
                         <td class="text-center">
                             <span class="badge {{ $user->is_active ? 'bg-success' : 'bg-secondary' }}">
                                 {{ $user->is_active ? 'Aktif' : 'Nonaktif' }}

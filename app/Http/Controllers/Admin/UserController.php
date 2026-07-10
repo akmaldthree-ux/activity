@@ -13,10 +13,19 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
+        $sort = $request->get('sort', 'name_asc');
+
         $users = User::with('division')
+            ->when($request->search, fn($q) => $q->where(fn($inner) =>
+                $inner->where('name', 'like', '%'.$request->search.'%')
+                      ->orWhere('email', 'like', '%'.$request->search.'%')
+            ))
             ->when($request->role, fn($q) => $q->where('role', $request->role))
             ->when($request->division_id, fn($q) => $q->where('division_id', $request->division_id))
-            ->orderBy('name')
+            ->when($sort === 'name_asc',  fn($q) => $q->orderBy('name'))
+            ->when($sort === 'name_desc', fn($q) => $q->orderByDesc('name'))
+            ->when($sort === 'newest',    fn($q) => $q->orderByDesc('created_at'))
+            ->when($sort === 'oldest',    fn($q) => $q->orderBy('created_at'))
             ->paginate(20)
             ->withQueryString();
 
