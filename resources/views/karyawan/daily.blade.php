@@ -158,22 +158,13 @@
                     </div>
                 </div>
                 <div id="activityContainer">
-                    @php $tags = \App\Models\Activity::TAGS; @endphp
                     @forelse($plan->activities ?? [] as $activity)
                     <div class="activity-row-item mb-2 p-2 activity-row">
                         <div class="row g-2 align-items-center">
-                            <div class="col-md-6">
+                            <div class="col-md-8">
                                 <input type="text" name="activities[{{ $loop->index }}][description]"
                                        class="form-control form-control-sm" placeholder="Deskripsi aktivitas"
                                        value="{{ $activity->description }}" required>
-                            </div>
-                            <div class="col-md-2">
-                                <select name="activities[{{ $loop->index }}][tag]" class="form-select form-select-sm">
-                                    <option value="">Tag</option>
-                                    @foreach($tags as $t)
-                                    <option value="{{ $t }}" {{ $activity->tag==$t?'selected':'' }}>{{ $t }}</option>
-                                    @endforeach
-                                </select>
                             </div>
                             <div class="col-md-3">
                                 <select name="activities[{{ $loop->index }}][priority]" class="form-select form-select-sm">
@@ -192,17 +183,9 @@
                     @empty
                     <div class="activity-row-item mb-2 p-2 activity-row">
                         <div class="row g-2 align-items-center">
-                            <div class="col-md-6">
+                            <div class="col-md-8">
                                 <input type="text" name="activities[0][description]" class="form-control form-control-sm"
                                        placeholder="Contoh: Meeting dengan tim" required>
-                            </div>
-                            <div class="col-md-2">
-                                <select name="activities[0][tag]" class="form-select form-select-sm">
-                                    <option value="">Tag</option>
-                                    @foreach($tags as $t)
-                                    <option value="{{ $t }}">{{ $t }}</option>
-                                    @endforeach
-                                </select>
                             </div>
                             <div class="col-md-3">
                                 <select name="activities[0][priority]" class="form-select form-select-sm">
@@ -244,7 +227,6 @@
             <div class="mb-2 p-2 activity-row rounded d-flex justify-content-between align-items-start">
                 <span>{{ $act->description }}</span>
                 <div class="d-flex gap-1 flex-shrink-0 ms-2">
-                    @if($act->tag) <span class="badge bg-light text-secondary border">{{ $act->tag }}</span> @endif
                     <span class="badge priority-badge-{{ $act->priority }}">{{ $act->priorityLabel() }}</span>
                 </div>
             </div>
@@ -513,17 +495,13 @@ document.getElementById('btnAddGoal')?.addEventListener('click', () => {
     attachRemoveGoal(div.querySelector('.btn-remove-goal'));
 });
 
-const availableTags = @json(\App\Models\Activity::TAGS);
-const tagOptions = availableTags.map(t => `<option value="${t}">${t}</option>`).join('');
-
 document.getElementById('btnAddActivity')?.addEventListener('click', () => {
     actIdx++;
     const container = document.getElementById('activityContainer');
     const div = document.createElement('div');
     div.className = 'activity-row-item mb-2 p-2 activity-row';
     div.innerHTML = `<div class="row g-2 align-items-center">
-        <div class="col-md-6"><input type="text" name="activities[${actIdx}][description]" class="form-control form-control-sm" placeholder="Deskripsi aktivitas" required></div>
-        <div class="col-md-2"><select name="activities[${actIdx}][tag]" class="form-select form-select-sm"><option value="">Tag</option>${tagOptions}</select></div>
+        <div class="col-md-8"><input type="text" name="activities[${actIdx}][description]" class="form-control form-control-sm" placeholder="Deskripsi aktivitas" required></div>
         <div class="col-md-3"><select name="activities[${actIdx}][priority]" class="form-select form-select-sm">
             <option value="tinggi">🔴 Tinggi</option>
             <option value="sedang" selected>🟡 Sedang</option>
@@ -565,8 +543,7 @@ function addCarryOver(desc, priority, tag) {
     const div = document.createElement('div');
     div.className = 'activity-row-item mb-2 p-2 activity-row';
     div.innerHTML = `<div class="row g-2 align-items-center">
-        <div class="col-md-6"><input type="text" name="activities[${actIdx}][description]" class="form-control form-control-sm" value="${desc.replace(/"/g,'&quot;')}" required></div>
-        <div class="col-md-2"><select name="activities[${actIdx}][tag]" class="form-select form-select-sm"><option value="">Tag</option>${tagOptions}</select></div>
+        <div class="col-md-8"><input type="text" name="activities[${actIdx}][description]" class="form-control form-control-sm" value="${desc.replace(/"/g,'&quot;')}" required></div>
         <div class="col-md-3"><select name="activities[${actIdx}][priority]" class="form-select form-select-sm">
             <option value="tinggi" ${priority==='tinggi'?'selected':''}>🔴 Tinggi</option>
             <option value="sedang" ${priority==='sedang'?'selected':''}>🟡 Sedang</option>
