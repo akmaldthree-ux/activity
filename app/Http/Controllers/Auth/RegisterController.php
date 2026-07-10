@@ -24,7 +24,7 @@ class RegisterController extends Controller
             'name'                  => ['required', 'string', 'max:255'],
             'email'                 => ['required', 'email', 'unique:users'],
             'password'              => ['required', 'string', 'min:8', 'confirmed'],
-            'division_id'           => ['required', 'exists:divisions,id'],
+            'division_id'           => ['required_unless:role,direksi', 'nullable', 'exists:divisions,id'],
             'role'                  => ['required', 'in:karyawan,leader,manager,direksi'],
             'jabatan'               => ['required', 'string', 'max:255'],
         ]);

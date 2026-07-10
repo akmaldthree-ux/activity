@@ -42,9 +42,10 @@
                        placeholder="Ulangi password" required>
             </div>
 
-            <div class="col-md-6">
+            <div class="col-md-6" id="divisionField" {{ old('role') === 'direksi' ? 'style=display:none' : '' }}>
                 <label class="form-label">Divisi</label>
-                <select name="division_id" class="form-select" required>
+                <select name="division_id" id="divisionSelect" class="form-select"
+                        {{ old('role') !== 'direksi' ? 'required' : '' }}>
                     <option value="">-- Pilih Divisi --</option>
                     @foreach($divisions as $div)
                         <option value="{{ $div->id }}" {{ old('division_id') == $div->id ? 'selected' : '' }}>
@@ -56,7 +57,7 @@
 
             <div class="col-md-6">
                 <label class="form-label">Role / Tingkatan</label>
-                <select name="role" class="form-select" required>
+                <select name="role" id="roleSelect" class="form-select" required>
                     <option value="">-- Pilih Role --</option>
                     <option value="karyawan" {{ old('role') === 'karyawan' ? 'selected' : '' }}>Karyawan</option>
                     <option value="leader"   {{ old('role') === 'leader'   ? 'selected' : '' }}>Leader</option>
@@ -83,4 +84,23 @@
         Sudah punya akun? <a href="{{ route('login') }}">Masuk di sini</a>
     </p>
 </div>
+
+@push('scripts')
+<script>
+(function () {
+    const roleSelect     = document.getElementById('roleSelect');
+    const divisionField  = document.getElementById('divisionField');
+    const divisionSelect = document.getElementById('divisionSelect');
+
+    function toggleDivision() {
+        const isDireksi = roleSelect.value === 'direksi';
+        divisionField.style.display  = isDireksi ? 'none' : '';
+        divisionSelect.required      = !isDireksi;
+        if (isDireksi) divisionSelect.value = '';
+    }
+
+    roleSelect.addEventListener('change', toggleDivision);
+})();
+</script>
+@endpush
 @endsection
