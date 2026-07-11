@@ -100,29 +100,34 @@ class ReportController extends Controller
 
     public function weekly(Request $request)
     {
-        $manager    = Auth::user();
+        $manager = Auth::user();
 
-        // Default to current week
-        $weekInput = $request->input('week', now()->format('Y-\WW'));
-        // Parse: "2026-W27" format
-        $parts    = explode('-W', $weekInput);
-        $weekYear = (int) ($parts[0] ?? now()->year);
-        $weekNum  = (int) ($parts[1] ?? now()->isoWeek());
+        // Default: Senin s.d. Sabtu minggu ini
+        $defaultFrom = Carbon::now('Asia/Jakarta')->startOfWeek(Carbon::MONDAY)->toDateString();
+        $defaultTo   = Carbon::now('Asia/Jakarta')->endOfWeek(Carbon::SATURDAY)->toDateString();
 
-        $weekStart = Carbon::now()->setISODate($weekYear, $weekNum)->startOfDay()->timezone('Asia/Jakarta');
-        $weekEnd   = $weekStart->copy()->endOfWeek(Carbon::SATURDAY); // Mon-Sat
+        $dateFrom = $request->input('from', $defaultFrom);
+        $dateTo   = $request->input('to',   $defaultTo);
 
-        // All weekdays in range
+        $rangeStart = Carbon::parse($dateFrom, 'Asia/Jakarta')->startOfDay();
+        $rangeEnd   = Carbon::parse($dateTo,   'Asia/Jakarta')->endOfDay();
+
+        // Clamp agar from <= to
+        if ($rangeStart->gt($rangeEnd)) {
+            [$rangeStart, $rangeEnd] = [$rangeEnd, $rangeStart];
+        }
+
+        // Semua hari non-Minggu dalam rentang
         $weekDays = [];
-        $current = $weekStart->copy();
-        while ($current->lte($weekEnd)) {
+        $current = $rangeStart->copy();
+        while ($current->lte($rangeEnd)) {
             if (!$current->isSunday()) {
                 $weekDays[] = $current->copy();
             }
             $current->addDay();
         }
 
-        $allHolidays = Holiday::whereBetween('date', [$weekStart->toDateString(), $weekEnd->toDateString()])
+        $allHolidays = Holiday::whereBetween('date', [$rangeStart->toDateString(), $rangeEnd->toDateString()])
             ->get()
             ->keyBy(fn($h) => $h->date->format('Y-m-d'))
             ->map(fn($h) => $h->name)
@@ -132,9 +137,9 @@ class ReportController extends Controller
 
         $workdays = count(array_filter($weekDays, fn($d) => !isset($allHolidays[$d->format('Y-m-d')])));
 
-        $rekap = $karyawans->map(function ($user) use ($weekStart, $weekEnd, $weekDays, $allHolidays, $workdays) {
+        $rekap = $karyawans->map(function ($user) use ($rangeStart, $rangeEnd, $weekDays, $allHolidays, $workdays) {
             $plans = DailyPlan::where('user_id', $user->id)
-                ->whereBetween('plan_date', [$weekStart->toDateString(), $weekEnd->toDateString()])
+                ->whereBetween('plan_date', [$rangeStart->toDateString(), $rangeEnd->toDateString()])
                 ->get()
                 ->keyBy(fn($p) => $p->plan_date->format('Y-m-d'));
 
@@ -152,8 +157,12 @@ class ReportController extends Controller
 
         $totalKaryawan = $karyawans->count();
 
+        // Alias agar view tetap pakai nama lama
+        $weekStart = $rangeStart;
+        $weekEnd   = $rangeEnd;
+
         return view('manager.weekly-report', compact(
-            'rekap', 'weekStart', 'weekEnd', 'weekDays', 'weekInput', 'totalKaryawan'
+            'rekap', 'weekStart', 'weekEnd', 'weekDays', 'dateFrom', 'dateTo', 'totalKaryawan'
         ));
     }
 

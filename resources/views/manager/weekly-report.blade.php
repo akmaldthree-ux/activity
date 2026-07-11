@@ -15,10 +15,17 @@
 
 @section('content')
 <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
-    <h5 class="fw-bold mb-0"><i class="bi bi-file-earmark-text me-2"></i>Rekap Mingguan</h5>
-    <div class="d-flex gap-2 no-print">
-        <form class="d-flex gap-2">
-            <input type="week" name="week" class="form-control form-control-sm" value="{{ $weekInput }}" style="width:auto">
+    <h5 class="fw-bold mb-0"><i class="bi bi-file-earmark-text me-2"></i>Rekap Aktivitas</h5>
+    <div class="d-flex gap-2 no-print flex-wrap">
+        <form class="d-flex gap-2 align-items-center flex-wrap">
+            <div class="d-flex align-items-center gap-1">
+                <label class="small text-muted mb-0 text-nowrap">Dari</label>
+                <input type="date" name="from" class="form-control form-control-sm" value="{{ $dateFrom }}" style="width:auto">
+            </div>
+            <div class="d-flex align-items-center gap-1">
+                <label class="small text-muted mb-0">s.d.</label>
+                <input type="date" name="to" class="form-control form-control-sm" value="{{ $dateTo }}" style="width:auto">
+            </div>
             <button type="submit" class="btn btn-sm btn-primary">Tampilkan</button>
         </form>
         <button onclick="window.print()" class="btn btn-sm btn-outline-secondary">
@@ -29,8 +36,8 @@
 
 <div class="card border-0 shadow-sm mb-3">
     <div class="card-header bg-white">
-        <strong>Minggu {{ $weekStart->format('d M') }} – {{ $weekEnd->format('d M Y') }}</strong>
-        <span class="text-muted ms-2 small">{{ $totalKaryawan }} karyawan</span>
+        <strong>{{ $weekStart->format('d M Y') }} – {{ $weekEnd->format('d M Y') }}</strong>
+        <span class="text-muted ms-2 small">{{ $totalKaryawan }} karyawan · {{ count($weekDays) }} hari</span>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
