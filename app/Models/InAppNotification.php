@@ -13,7 +13,10 @@ class InAppNotification extends Model
 
     protected function casts(): array
     {
-        return ['read_at' => 'datetime'];
+        return [
+            'read_at' => 'datetime',
+            'user_id' => 'integer',
+        ];
     }
 
     public function user(): BelongsTo
