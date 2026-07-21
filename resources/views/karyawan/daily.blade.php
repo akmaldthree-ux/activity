@@ -62,7 +62,7 @@
             </small>
         @elseif($isToday && !$plan->plan_submitted_at)
             <small class="{{ $planDeadlinePassed ? 'text-danger' : 'text-muted' }}">
-                <i class="bi bi-clock me-1"></i>Deadline 09:00
+                <i class="bi bi-clock me-1"></i>Deadline 11:59
                 @if($planDeadlinePassed) <span class="badge bg-danger">Sudah Lewat</span> @endif
             </small>
         @endif
@@ -253,7 +253,7 @@
             </small>
         @elseif($isToday && $plan->plan_submitted_at)
             <small class="{{ $reportDeadlinePassed ? 'text-danger' : 'text-muted' }}">
-                <i class="bi bi-clock me-1"></i>Deadline 20:00
+                <i class="bi bi-clock me-1"></i>Deadline 23:59
                 @if($reportDeadlinePassed) <span class="badge bg-danger">Sudah Lewat</span> @endif
             </small>
         @endif

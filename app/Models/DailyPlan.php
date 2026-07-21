@@ -13,8 +13,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class DailyPlan extends Model
 {
     // Deadline plan pagi & report sore (WIB)
-    public const PLAN_DEADLINE_HOUR = 9;   // 09:00
-    public const REPORT_DEADLINE_HOUR = 20; // 20:00
+    public const PLAN_DEADLINE_HOUR = 12;  // 11:59 → telat mulai jam 12:00
+    public const REPORT_DEADLINE_HOUR = 24; // 23:59 → tidak pernah terlambat dalam hari yang sama
 
     protected function casts(): array
     {
